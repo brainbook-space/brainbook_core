@@ -51,25 +51,6 @@ class BrowserMenu extends LitElement {
         ${autoUpdaterEl}
 
         <div class="section">
-          <div class="menu-item" @click=${e => this.onNewHyperdrive()}>
-            <i class="fas fa-plus"></i>
-            <span class="label">New Hyperdrive...</span>
-          </div>
-
-          <div class="menu-item" @click=${e => this.onNewHyperdriveFromFolder(e)}>
-            <i class="fas fa-file-upload"></i>
-            <span class="label">New Hyperdrive From Folder...</span>
-          </div>
-        </div>
-
-        <div class="section">
-          <div class="menu-item" @click=${e => this.onOpenPage(e, 'hyper://private')}>
-            <i class="fas fa-lock"></i>
-            <span class="label">My Private Drive</span>
-          </div>
-        </div>
-
-        <div class="section">
           <div class="menu-item" @click=${e => this.onOpenPage(e, 'beaker://library')}>
             <img class="favicon" src="asset:favicon:beaker://library/">
             <span class="label">My Library</span>
@@ -148,31 +129,6 @@ class BrowserMenu extends LitElement {
       bg.shellMenus.triggerWindowMenuItemById(menu, id)
       bg.shellMenus.close()
     }
-  }
-
-  async onNewHyperdrive () {
-    bg.shellMenus.close()
-    const url = await bg.hyperdrive.createDrive()
-    bg.beakerBrowser.openUrl(url, {setActive: true, addedPaneUrls: ['beaker://editor/']})
-  }
-
-  async onNewHyperdriveFromFolder (e) {
-    bg.shellMenus.close()
-
-    var folder = await bg.beakerBrowser.showOpenDialog({
-      title: 'Select folder',
-      buttonLabel: 'Use folder',
-      properties: ['openDirectory']
-    })
-    if (!folder || !folder.length) return
-
-    var url = await bg.hyperdrive.createDrive({
-      title: folder[0].split('/').pop(),
-      prompt: false
-    })
-    await bg.hyperdrive.importFromFilesystem({src: folder[0], dst: url})
-    
-    bg.beakerBrowser.openUrl(url, {setActive: true})
   }
 
   onPrint (e) {

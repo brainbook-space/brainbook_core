@@ -14,8 +14,6 @@ import * as logLib from './logger'
 import * as adblocker from './adblocker'
 const logger = logLib.child({category: 'browser'})
 import * as settingsDb from './dbs/settings'
-import { convertDatArchive } from './dat/index'
-import datDns from './dat/dns'
 import { open as openUrl } from './open-url'
 import * as windows from './ui/windows'
 import { createMenuItem as createContextMenuItem, shouldShowMenuItem as shouldShowContextMenuItem } from './ui/context-menu'
@@ -24,9 +22,6 @@ import { updateSetupState } from './ui/setup-flow'
 import * as modals from './ui/subwindows/modals'
 import * as siteInfo from './ui/subwindows/site-info'
 import { findWebContentsParentWindow } from './lib/electron'
-import * as hyperDaemon from './hyper/daemon'
-import * as bookmarks from './filesystem/bookmarks'
-import { getDriveIdent } from './filesystem/index'
 import * as wcTrust from './wc-trust'
 import { spawnAndExecuteJs } from './lib/electron'
 
@@ -205,7 +200,7 @@ export const WEBAPI = {
   imageToIco,
 
   reconnectHyperdriveDaemon () {
-    return hyperDaemon.setup()
+    return
   },
 
   executeShellWindowCommand,
@@ -261,13 +256,6 @@ export async function downloadURL (url) {
   this.sender.downloadURL(url)
 }
 
-export async function convertDat (url) {
-  var win = findWebContentsParentWindow(this.sender)
-  var key = await datDns.resolveName(url)
-  var driveUrl = await convertDatArchive(win, key)
-  tabManager.create(win, driveUrl, {setActive: true})
-}
-
 export function getResourceContentType (url) {
   let i = url.indexOf('#')
   if (i !== -1) url = url.slice(0, i) // strip the fragment
@@ -284,9 +272,6 @@ export async function getCertificate (url) {
     return Object.assign({type: 'tls'}, cert)
   } else if (url.startsWith('beaker:')) {
     return {type: 'beaker'}
-  } else if (url.startsWith('hyper://')) {
-    let ident = await getDriveIdent(url, true)
-    return {type: 'hyperdrive', ident}
   }
 }
 
@@ -479,24 +464,18 @@ export async function getDefaultProtocolSettings () {
     // we can just use xdg-mime directly instead
     // see https://github.com/beakerbrowser/beaker/issues/915
     // -prf
-    let [httpHandler, hyperHandler, datHandler] = await Promise.all([
+    let [httpHandler] = await Promise.all([
       // If there is no default specified, be sure to catch any error
       // from exec and return '' otherwise Promise.all errors out.
       exec('xdg-mime query default "x-scheme-handler/http"').catch(err => ''),
-      exec('xdg-mime query default "x-scheme-handler/hyper"').catch(err => ''),
-      exec('xdg-mime query default "x-scheme-handler/dat"').catch(err => '')
     ])
     if (httpHandler && httpHandler.stdout) httpHandler = httpHandler.stdout
-    if (hyperHandler && hyperHandler.stdout) hyperHandler = hyperHandler.stdout
-    if (datHandler && datHandler.stdout) datHandler = datHandler.stdout
     return {
-      http: (httpHandler || '').toString().trim() === DOT_DESKTOP_FILENAME,
-      hyper: (hyperHandler || '').toString().trim() === DOT_DESKTOP_FILENAME,
-      dat: (datHandler || '').toString().trim() === DOT_DESKTOP_FILENAME
+      http: (httpHandler || '').toString().trim() === DOT_DESKTOP_FILENAME
     }
   }
 
-  return Promise.resolve(['http', 'hyper', 'dat'].reduce((res, x) => {
+  return Promise.resolve(['http'].reduce((res, x) => {
     res[x] = app.isDefaultProtocolClient(x)
     return res
   }, {}))
@@ -534,23 +513,17 @@ export function getInfo () {
     paths: {
       userData: app.getPath('userData')
     },
-    isDaemonActive: hyperDaemon.isActive()
+    isDaemonActive: false
   }
 }
 
 export async function getDaemonStatus () {
-  return hyperDaemon.getDaemonStatus()
+  return false
 }
 
 export async function getDaemonNetworkStatus () {
   // bit of a hack, this
-  return Array.from(hyperDaemon.getClient().drive._drives, drive => {
-    var key = drive.drive.key.toString('hex')
-    return {
-      key,
-      peers: hyperDaemon.listPeerAddresses(key)
-    }
-  })
+  return []
 }
 
 export function checkForUpdates (opts = {}) {
@@ -601,7 +574,7 @@ export function updateAdblocker () {
 }
 
 export async function migrate08to09 () {
-  await bookmarks.migrateBookmarksFromSqlite()
+  // await bookmarks.migrateBookmarksFromSqlite()
 }
 
 const SCROLLBAR_WIDTH = 16

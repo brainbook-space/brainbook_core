@@ -20,9 +20,6 @@ import * as adblocker from './bg/adblocker'
 import * as analytics from './bg/analytics'
 import * as portForwarder from './bg/nat-port-forwarder'
 import dbs from './bg/dbs/index'
-import hyper from './bg/hyper/index'
-import * as filesystem from './bg/filesystem/index'
-import * as bookmarkPins from './bg/filesystem/pins'
 import * as webapis from './bg/web-apis/bg'
 
 import * as initWindow from './bg/ui/init-window'
@@ -36,8 +33,6 @@ import * as permissions from './bg/ui/permissions'
 
 import * as beakerProtocol from './bg/protocols/beaker'
 import * as assetProtocol from './bg/protocols/asset'
-import * as hyperProtocol from './bg/protocols/hyper'
-import * as datProtocol from './bg/protocols/dat'
 
 import * as testDriver from './bg/test-driver'
 import * as openURL from './bg/open-url'
@@ -71,8 +66,6 @@ app.allowRendererProcessReuse = true
 
 // configure the protocols
 protocol.registerSchemesAsPrivileged([
-  {scheme: 'dat', privileges: {standard: true, secure: true, allowServiceWorkers: true, supportFetchAPI: true, corsEnabled: true}},
-  {scheme: 'hyper', privileges: {standard: true, secure: true, allowServiceWorkers: true, supportFetchAPI: true, corsEnabled: true, stream: true}},
   {scheme: 'beaker', privileges: {standard: true, secure: true, allowServiceWorkers: true, supportFetchAPI: true, corsEnabled: true}}
 ])
 
@@ -115,23 +108,14 @@ app.on('ready', async function () {
 
   // start subsystems
   // (order is important)
-  log.info('Starting hyperdrive')
-  await hyper.setup(commonOpts)
-  log.info('Initializing hyperdrive filesystem')
-  await filesystem.setup()
   log.info('Initializing browser')
   await beakerBrowser.setup()
-  adblocker.setup()
-  analytics.setup()
-  await bookmarkPins.setup()
+  // await bookmarkPins.setup()
 
   // protocols
   log.info('Registering protocols')
   assetProtocol.setup()
   assetProtocol.register(protocol)
-  hyperProtocol.register(protocol)
-  datProtocol.register(protocol)
-
   initWindow.close()
 
   // setup flow
@@ -165,12 +149,7 @@ app.on('window-all-closed', () => {
 })
 
 app.on('will-quit', async (e) => {
-  if (hyper.daemon.requiresShutdown()) {
-    e.preventDefault()
-    log.info('Delaying shutdown to teardown the daemon')
-    await hyper.daemon.shutdown()
-    app.quit()
-  }
+
 })
 
 app.on('quit', () => {

@@ -3,7 +3,6 @@ import { URLSearchParams } from 'url'
 import { BrowserWindow } from 'electron'
 import { ICON_PATH } from './windows'
 import * as profileDb from '../dbs/profile-data-db'
-import * as filesystem from '../filesystem/index'
 import knex from '../lib/knex'
 
 // globals

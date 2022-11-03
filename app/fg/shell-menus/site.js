@@ -23,15 +23,6 @@ class SiteMenu extends LitElement {
   async init (params) {
     this.url = params.url
     this.requestUpdate()
-
-    if (this.url.startsWith('hyper://')) {
-      try {
-        this.driveInfo = await bg.hyperdrive.getInfo(this.url)
-      } catch (e) {
-        console.debug(e)
-      }
-      this.requestUpdate()
-    }
   }
 
   render () {

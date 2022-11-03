@@ -1,5 +1,4 @@
 import * as rpc from 'pauls-electron-rpc'
-import * as hyperdrive from './fg/hyperdrive'
 import * as internal from './fg/internal'
 import * as external from './fg/external'
 import * as experimental from './fg/experimental'

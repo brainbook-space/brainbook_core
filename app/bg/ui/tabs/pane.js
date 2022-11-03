@@ -4,7 +4,6 @@ import path from 'path'
 import { promises as fs } from 'fs'
 import { EventEmitter } from 'events'
 import _throttle from 'lodash.throttle'
-import { parseDriveUrl, stripUrlHash } from '../../../lib/urls'
 import { toNiceUrl } from '../../../lib/strings'
 import _get from 'lodash.get'
 import _pick from 'lodash.pick'
@@ -16,10 +15,7 @@ import { getResourceContentType } from '../../browser'
 import { DRIVE_KEY_REGEX } from '../../../lib/strings'
 import * as sitedataDb from '../../dbs/sitedata'
 import * as historyDb from '../../dbs/history'
-import * as folderSyncDb from '../../dbs/folder-sync'
-import * as filesystem from '../../filesystem/index'
-import * as bookmarks from '../../filesystem/bookmarks'
-import hyper from '../../hyper/index'
+import * as bookmarksDb from '../../dbs/bookmarks'
 
 const ERR_ABORTED = -3
 const ERR_CONNECTION_REFUSED = -102
@@ -106,7 +102,7 @@ export class Pane extends EventEmitter {
         preload: path.join(__dirname, 'fg', 'webview-preload', 'index.build.js'),
         nodeIntegrationInSubFrames: true,
         contextIsolation: true,
-        worldSafeExecuteJavaScript: false, // TODO- this causes promises to fail in executeJavaScript, need to file an issue with electron
+        worldSafeExecuteJavaScript: true, // TODO- this causes promises to fail in executeJavaScript, need to file an issue with electron
         webviewTag: false,
         sandbox: true,
         defaultEncoding: 'utf-8',
@@ -225,13 +221,13 @@ export class Pane extends EventEmitter {
         }
       }
       if (urlp.protocol === 'beaker:') {
-        if (urlp.hostname === 'diff') return 'Beaker Diff/Merge Tool'
-        if (urlp.hostname === 'explorer') return 'Beaker Files Explorer'
-        if (urlp.hostname === 'history') return 'Beaker History'
-        if (urlp.hostname === 'library') return 'Beaker Library'
-        if (urlp.hostname === 'settings') return 'Beaker Settings'
-        if (urlp.hostname === 'webterm') return 'Beaker Webterm'
-        return 'Beaker'
+        if (urlp.hostname === 'diff') return 'BrainBook Diff/Merge Tool'
+        if (urlp.hostname === 'explorer') return 'BrainBook Files Explorer'
+        if (urlp.hostname === 'history') return 'BrainBook History'
+        if (urlp.hostname === 'library') return 'BrainBook Library'
+        if (urlp.hostname === 'settings') return 'BrainBook Settings'
+        if (urlp.hostname === 'webterm') return 'BrainBook Webterm'
+        return 'BrainBook'
       }
       return hostname + (urlp.port ? `:${urlp.port}` : '')
     } catch (e) {
@@ -240,12 +236,12 @@ export class Pane extends EventEmitter {
   }
 
   get siteSubtitle () {
-    if (this.driveInfo) {
-      var origin = this.origin
-      var version = /\+([\d]+)/.exec(origin) ? `v${/\+([\d]+)/.exec(origin)[1]}` : ''
-      var forkLabel = _get(filesystem.listDrives().find(d => d.key === this.driveInfo.key), 'forkOf.label', '')
-      return [forkLabel, version].filter(Boolean).join(' ')
-    }
+    // if (this.driveInfo) {
+    //   var origin = this.origin
+    //   var version = /\+([\d]+)/.exec(origin) ? `v${/\+([\d]+)/.exec(origin)[1]}` : ''
+    //   var forkLabel = _get(filesystem.listDrives().find(d => d.key === this.driveInfo.key), 'forkOf.label', '')
+    //   return [forkLabel, version].filter(Boolean).join(' ')
+    // }
     return ''
   }
 
@@ -279,11 +275,6 @@ export class Pane extends EventEmitter {
       }
       if (urlp.protocol === 'http:') {
         return 'untrusted'
-      }
-      if (urlp.protocol === 'hyper:' && this.driveInfo) {
-        if (this.driveInfo.ident?.internal) {
-          return 'trusted'
-        }
       }
     } catch (e) {
     }
@@ -388,7 +379,6 @@ export class Pane extends EventEmitter {
       historyDb.addTabClose(0, {url: this.url, title: this.title})
     }
     this.hide()
-    this.stopLiveReloading()
     this.browserView.webContents.destroy()
     this.emit('destroyed')
   }
@@ -492,44 +482,6 @@ export class Pane extends EventEmitter {
     this.webContents.findInPage(this.currentInpageFindString, {findNext: false, forward: dir !== -1})
   }
 
-  // live reloading
-  // =
-
-  async toggleLiveReloading (enable) {
-    if (typeof enable === 'undefined') {
-      enable = !this.liveReloadEvents
-    }
-    if (this.liveReloadEvents) {
-      this.liveReloadEvents.destroy()
-      this.liveReloadEvents = false
-    } else if (this.driveInfo) {
-      let drive = hyper.drives.getDrive(this.driveInfo.key)
-      if (!drive) return
-
-      let {version} = parseDriveUrl(this.url)
-      let {checkoutFS} = await hyper.drives.getDriveCheckout(drive, version)
-      this.liveReloadEvents = await checkoutFS.pda.watch()
-
-      const reload = _throttle(() => {
-        this.browserView.webContents.reload()
-      }, TRIGGER_LIVE_RELOAD_DEBOUNCE, {leading: false})
-      this.liveReloadEvents.on('data', ([evt]) => {
-        if (evt === 'changed') reload()
-      })
-      // ^ note this throttle is run on the front edge.
-      // That means snappier reloads (no delay) but possible double reloads if multiple files change
-    }
-    this.emitUpdateState()
-  }
-
-  stopLiveReloading () {
-    if (this.liveReloadEvents) {
-      this.liveReloadEvents.destroy()
-      this.liveReloadEvents = false
-      this.emitUpdateState()
-    }
-  }
-
   // custom renderers
   // =
 
@@ -615,47 +567,20 @@ export class Pane extends EventEmitter {
   // eg called by the bookmark systems after the bookmark state has changed
   async refreshState () {
     await Promise.all([
-      this.fetchIsBookmarked(true),
-      this.fetchDriveInfo(true)
+      this.fetchIsBookmarked(true)
     ])
     this.emitUpdateState()
   }
 
   async fetchIsBookmarked (noEmit = false) {
     var wasBookmarked = this.isBookmarked
-    this.isBookmarked = !!(await bookmarks.get(this.url))
+    this.isBookmarked = !!(await bookmarksDb.get(1, this.url))
     if (this.isBookmarked && !wasBookmarked) {
       this.captureScreenshot()
     }
     if (!noEmit) {
       this.emitUpdateState()
     }
-  }
-
-  async fetchDriveInfo (noEmit = false) {
-    // clear existing state
-    this.folderSyncPath = undefined
-    this.peers = 0
-    this.donateLinkHref = null
-
-    if (!this.url.startsWith('hyper://')) {
-      this.driveInfo = null
-      return
-    }
-    
-    // fetch new state
-    var key
-    try {
-      key = await hyper.dns.resolveName(this.url)
-      this.driveInfo = await hyper.drives.getDriveInfo(key)
-      this.driveInfo.ident = await filesystem.getDriveIdent(this.driveInfo.url, true)
-      this.folderSyncPath = await folderSyncDb.getPath(this.driveInfo.key)
-      this.peers = this.driveInfo.peers
-      this.donateLinkHref = _get(this, 'driveInfo.links.payment.0.href')
-    } catch (e) {
-      this.driveInfo = null
-    }
-    if (!noEmit) this.emitUpdateState()
   }
 
   // attached pane
@@ -701,7 +626,6 @@ export class Pane extends EventEmitter {
 
     // handle origin changes
     if (origin !== toOrigin(this.url)) {
-      this.stopLiveReloading()
       this.setAttachedPane(undefined)
       this.wantsAttachedPane = false
     }
@@ -727,12 +651,8 @@ export class Pane extends EventEmitter {
     this.favicons = null
     this.frameUrls = {[this.mainFrameId]: url} // drop all non-main-frame URLs
     await Promise.all([
-      this.fetchIsBookmarked(),
-      this.fetchDriveInfo()
+      this.fetchIsBookmarked()
     ])
-    if (httpResponseCode === 504 && url.startsWith('hyper://')) {
-      this.wasDriveTimeout = true
-    }
 
     // emit
     this.emitUpdateState()
@@ -854,6 +774,7 @@ export class Pane extends EventEmitter {
   }
 
   onNewWindow (e, url, frameName, disposition, options) {
+    console.log("!!!!!! new-window 1:", e)
     e.preventDefault()
     if (!this.isActive || !this.tab) return // only open if coming from the active pane
     var setActive = disposition === 'foreground-tab' || disposition === 'new-window'

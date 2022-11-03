@@ -5,7 +5,6 @@ import * as modals from './subwindows/modals'
 import { toggleShellInterface, getAddedWindowSettings } from './windows'
 import { download } from './downloads'
 import * as settingsDb from '../dbs/settings'
-import { runDrivePropertiesFlow } from './util'
 
 // NOTE
 // subtle but important!!

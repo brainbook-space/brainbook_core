@@ -23,7 +23,6 @@ import { examineLocationInput } from '../../../lib/urls'
 import { findWebContentsParentWindow } from '../../lib/electron'
 import * as sitedataDb from '../../dbs/sitedata'
 import * as settingsDb from '../../dbs/settings'
-import hyper from '../../hyper/index'
 
 const X_POSITION = 0
 const Y_POSITION = 75
@@ -616,10 +615,6 @@ export async function setup () {
     }
   })
 
-  // track daemon connectivity
-  hyper.daemon.on('daemon-restored', () => emitReplaceStateAllWindows())
-  hyper.daemon.on('daemon-stopped', () => emitReplaceStateAllWindows())
-
   // track peer-counts
   function iterateTabs (cb) {
     for (let winId in activeTabs) {
@@ -628,13 +623,6 @@ export async function setup () {
       }
     }
   }
-  hyper.drives.on('updated', ({details}) => {
-    iterateTabs(tab => {
-      if (tab.driveInfo && tab.driveInfo.url === details.url) {
-        tab.refreshState()
-      }
-    })
-  })
 }
 
 export function getAll (win) {
@@ -1136,7 +1124,7 @@ export function emitReplaceState (win) {
     isFullscreen: win.isFullScreen(),
     isShellInterfaceHidden: getAddedWindowSettings(win).isShellInterfaceHidden,
     isSidebarHidden: getAddedWindowSettings(win).isSidebarHidden,
-    isDaemonActive: hyper.daemon.isActive(),
+    isDaemonActive: false,
     hasBgTabs: backgroundTabs.length > 0
   }
   emit(win, 'replace-state', state)
@@ -1174,19 +1162,6 @@ rpc.exportAPI('background-process-views', viewsRPCManifest, {
         if (opts.sitePerms) state.sitePerms = await sitedataDb.getPermissions(tab.url)
       }
       return state
-    }
-  },
-
-  async getNetworkState (tab, opts) {
-    var win = getWindow(this.sender)
-    tab = getByIndex(win, tab)
-    if (tab && tab.primaryPane && tab.primaryPane.driveInfo) {
-      let drive = hyper.drives.getDrive(tab.primaryPane.driveInfo.key)
-      if (drive) {
-        return {
-          peers: drive.session.drive.metadata.peers.map(p => ({type: p.type, remoteAddress: p.remoteAddress}))
-        }
-      }
     }
   },
 

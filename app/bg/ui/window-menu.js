@@ -1,12 +1,10 @@
 import { app, BrowserWindow, dialog, Menu } from 'electron'
 import { createShellWindow, toggleShellInterface, getActiveWindow, getFocusedDevToolsHost } from './windows'
-import { runSelectFileDialog, runForkFlow, runDrivePropertiesFlow, exportDriveToFilesystem, importFilesystemToDrive } from './util'
 import { getEnvVar } from '../lib/env'
 import * as tabManager from './tabs/manager'
 import * as viewZoom from './tabs/zoom'
 import * as shellMenus from './subwindows/shell-menus'
 import { download } from './downloads'
-import hyper from '../hyper/index'
 import * as settingsDb from '../dbs/settings'
 
 // globals
@@ -122,20 +120,6 @@ export function buildWindowMenu (opts = {}) {
         accelerator: 'CmdOrCtrl+N',
         click: function () { createShellWindow() },
         reserved: true
-      },
-      { type: 'separator' },
-      {
-        id: 'openFile',
-        label: 'Open File',
-        accelerator: 'CmdOrCtrl+O',
-        click: item => {
-          createWindowIfNone(win, async (win) => {
-            var res = await runSelectFileDialog(win, {
-              buttonLabel: 'Open File'
-            })
-            tabManager.create(win, res[0].url, {setActive: true, adjacentActive: true})
-          })
-        }
       },
       { type: 'separator' },
       // TODO
@@ -440,128 +424,6 @@ export function buildWindowMenu (opts = {}) {
   var driveMenu = {
     label: 'Drive',
     submenu: [
-      {
-        id: 'toggleFilesExplorer',
-        label: 'Explore Files',
-        enabled: !noWindows && !!isDriveSite,
-        click: async function (item) {
-          if (tab) tab.togglePaneByOrigin({url: 'beaker://explorer/'})
-        }
-      },
-      {type: 'separator'},
-      {
-        id: 'forkDrive',
-        label: 'Fork Drive',
-        enabled: !!isDriveSite,
-        async click (item) {
-          if (win) {
-            let newUrl = await runForkFlow(win, url)
-            tabManager.create(win, newUrl, {setActive: true})
-          }
-        }
-      },
-      {
-        id: 'diffMerge',
-        label: 'Diff / Merge',
-        enabled: !!isDriveSite,
-        async click (item) {
-          if (win) tabManager.create(win, `beaker://diff/?base=${url}`, {setActive: true})
-        }
-      },
-      { type: 'separator' },
-      {
-        id: 'importFiles',
-        label: 'Import Files',
-        enabled: !noWindows && isDriveSite && isWritable,
-        click: async (item) => {
-          if (!driveInfo || !driveInfo.writable) return
-          var {filePaths} = await dialog.showOpenDialog({
-            title: `Import Files`,
-            buttonLabel: 'Select File(s)',
-            properties: ['openFile', 'multiSelections']
-          })
-          if (!filePaths[0]) return
-          var res = await runSelectFileDialog(win, {
-            title: 'Choose where to import to',
-            buttonLabel: 'Import File(s)',
-            drive: driveInfo.url,
-            select: 'folder'
-          })
-          var targetUrl = res[0].url
-          let confirmation = await dialog.showMessageBox({
-            type: 'question',
-            message: `Import ${filePaths.length > 1 ? `${filePaths.length} files` : filePaths[0]} to ${targetUrl}? Any conflicting files will be overwritten.`,
-            buttons: ['OK', 'Cancel']
-          })
-          if (confirmation.response !== 0) return
-          for (let filePath of filePaths) {
-            await importFilesystemToDrive(filePath, targetUrl)
-          }
-          dialog.showMessageBox({message: 'Import complete'})
-        }
-      },
-      {
-        id: 'importFolder',
-        label: 'Import Folder',
-        enabled: !noWindows && isDriveSite && isWritable,
-        click: async (item) => {
-          if (!driveInfo || !driveInfo.writable) return
-          var {filePaths} = await dialog.showOpenDialog({
-            title: `Import Folder`,
-            buttonLabel: 'Select Folder(s)',
-            properties: ['openDirectory', 'multiSelections']
-          })
-          if (!filePaths[0]) return
-          var res = await runSelectFileDialog(win, {
-            title: 'Choose where to import to',
-            buttonLabel: 'Import Folder(s)',
-            drive: driveInfo.url,
-            select: 'folder'
-          })
-          var targetUrl = res[0].url
-          let confirmation = await dialog.showMessageBox({
-            type: 'question',
-            message: `Import ${filePaths.length > 1 ? `${filePaths.length} folders` : filePaths[0]} to ${targetUrl}? Any conflicting files will be overwritten.`,
-            buttons: ['OK', 'Cancel']
-          })
-          if (confirmation.response !== 0) return
-          for (let filePath of filePaths) {
-            await importFilesystemToDrive(filePath, targetUrl, {preserveFolder: true})
-          }
-          dialog.showMessageBox({message: 'Import complete'})
-        }
-      },
-      {
-        id: 'exportFiles',
-        label: 'Export Files',
-        enabled: !noWindows && isDriveSite,
-        click: async (item) => {
-          if (!driveInfo) return
-          var {filePaths} = await dialog.showOpenDialog({
-            title: `Export Drive Files`,
-            buttonLabel: 'Export',
-            properties: ['openDirectory', 'createDirectory']
-          })
-          if (!filePaths[0]) return
-          let confirmation = await dialog.showMessageBox({
-            type: 'question',
-            message: `Export ${driveInfo.title || driveInfo.key} to ${filePaths[0]}? Any conflicting files will be overwritten.`,
-            buttons: ['OK', 'Cancel']
-          })
-          if (confirmation.response !== 0) return
-          await exportDriveToFilesystem(driveInfo.url, filePaths[0])
-          dialog.showMessageBox({message: 'Export complete'})
-        }
-      },
-      {type: 'separator'},
-      {
-        id: 'driveProperties',
-        label: 'Drive Properties',
-        enabled: !!isDriveSite,
-        async click (item) {
-          if (win) runDrivePropertiesFlow(win, hyper.drives.fromURLToKey(url))
-        }
-      }
     ]
   }
 
@@ -644,14 +506,6 @@ export function buildWindowMenu (opts = {}) {
         accelerator: 'Ctrl+`',
         click: function (item) {
           if (tab) tab.togglePaneByOrigin({url: 'beaker://webterm/'})
-        }
-      },
-      {
-        id: 'toggleHypercoreDevtools',
-        label: 'Toggle Hypercore Devtools',
-        enabled: !noWindows,
-        click: async function (item) {
-          if (tab) tab.togglePaneByOrigin({url: 'beaker://hypercore-tools/'})
         }
       },
       {

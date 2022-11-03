@@ -78,39 +78,10 @@ class ShareMenu extends LitElement {
 
   async init (params) {
     var shareableUrl = undefined
-    if (params.url.startsWith('hyper://')) {
-      // establish the shareable url
-      try {
-        let driveInfo
-        let urlp = new URL(params.url)
-        let pathParts = urlp.pathname.split('/').filter(Boolean)
-        let pathAcc = []
-               
-        // find the drive that owns the location
-        while (pathParts.length > 0) {
-          let st = await bg.hyperdrive.stat(joinPath(urlp.origin, pathParts.join('/')))
-          if (st.mount) {
-            driveInfo = await bg.hyperdrive.getInfo(st.mount.key)
-            break
-          }
-          pathAcc.unshift(pathParts.pop())
-        }
-        if (!driveInfo) {
-          driveInfo = await bg.hyperdrive.getInfo(urlp.origin)
-        }
 
-        // make sure it can be shared
-        if (driveInfo && driveInfo.url !== 'hyper://private/') {
-          shareableUrl = driveInfo.url + '/' + pathAcc.join('/') + urlp.search + urlp.hash
-        }
-      } catch (e) {
-        console.debug(e)
-      }
-    } else {
-      // can always share as-is
-      shareableUrl = params.url
-    }
-
+    // can always share as-is
+    shareableUrl = params.url
+  
     this.canShare = !!shareableUrl
     this.url = shareableUrl
     await this.requestUpdate()

@@ -1,6 +1,5 @@
 import { session } from 'electron'
 import { PERMS, getPermId } from '../../lib/permissions'
-import hyper from '../hyper/index'
 import * as sitedata from '../dbs/sitedata'
 import _get from 'lodash.get'
 import { parseDriveUrl } from '../../lib/urls'
@@ -69,30 +68,6 @@ export function denyAllRequests (win) {
 export async function checkLabsPerm ({perm, labApi, apiDocsUrl, sender}) {
   var urlp = parseDriveUrl(sender.getURL())
   if (urlp.protocol === 'beaker:') return true
-  if (urlp.protocol === 'hyper:') {
-    // resolve name
-    let key = await hyper.dns.resolveName(urlp.hostname)
-
-    // check index.json for opt-in
-    let isOptedIn = false
-    let drive = hyper.drives.getDrive(key)
-    if (drive) {
-      let {checkoutFS} = await hyper.drives.getDriveCheckout(drive, urlp.version)
-      let manifest = await checkoutFS.pda.readManifest().catch(_ => {})
-      let apis = _get(manifest, 'experimental.apis')
-      if (apis && Array.isArray(apis)) {
-        isOptedIn = apis.includes(labApi)
-      }
-    }
-    if (!isOptedIn) {
-      throw new PermissionsError(`You must include "${labApi}" in your index.json experimental.apis list. See ${apiDocsUrl} for more information.`)
-    }
-
-    // ask user
-    let allowed = await requestPermission(perm, sender)
-    if (!allowed) throw new UserDeniedError()
-    return true
-  }
   throw new PermissionsError()
 }
 
