@@ -28,8 +28,6 @@ export default {
   fetchBody: 'promise',
   downloadURL: 'promise',
 
-  convertDat: 'promise',
-
   getResourceContentType: 'sync',
   getCertificate: 'promise',
 

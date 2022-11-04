@@ -189,8 +189,6 @@ export const WEBAPI = {
   fetchBody,
   downloadURL,
 
-  convertDat,
-
   getResourceContentType,
   getCertificate,
 

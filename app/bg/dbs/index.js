@@ -7,7 +7,6 @@ import * as sitedata from './sitedata'
 import * as watchlist from './watchlist'
 
 export default {
-  archives,
   auditLog,
   history,
   profileData,

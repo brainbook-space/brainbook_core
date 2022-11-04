@@ -496,7 +496,7 @@ class NavbarLocation extends LitElement {
 
   onClickConvertDat (e) {
     var { host } = new URL(this.url)
-    bg.beakerBrowser.convertDat(host)
+    // bg.beakerBrowser.convertDat(host)
   }
 
   onClickLiveReloadingBtn (e) {
