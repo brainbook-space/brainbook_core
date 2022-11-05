@@ -152,7 +152,7 @@ export async function setup () {
     }
   })
 
-  if (!isTestDriverActive && !isOpenUrlEnvVar && (customStartPage === 'previous' || (!previousSessionState.cleanExit && userWantsToRestoreSession()))) {
+  if (!isOpenUrlEnvVar && (customStartPage === 'previous' || (!previousSessionState.cleanExit && userWantsToRestoreSession()))) {
     // restore old window
     restoreBrowsingSession(previousSessionState)
   } else {

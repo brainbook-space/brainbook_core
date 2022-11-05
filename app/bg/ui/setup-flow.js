@@ -25,7 +25,7 @@ export async function runSetupFlow () {
     await profileDb.run(knex('setup_state').insert(setupState))
   }
 
-  var needsSetup = !setupState.profileSetup || !setupState.migrated08to09
+  var needsSetup = !setupState.profileSetup
   if (needsSetup) {
     setupWindow = new BrowserWindow({
       // titleBarStyle: 'hiddenInset',
@@ -65,5 +65,5 @@ export async function updateSetupState (obj) {
   // so use this as a cue to close the window
   // -prf
   var setupState = await profileDb.get('SELECT * FROM setup_state')
-  if (setupWindow && setupState.profileSetup && setupState.migrated08to09) setupWindow.close()
+  if (setupWindow && setupState.profileSetup) setupWindow.close()
 }

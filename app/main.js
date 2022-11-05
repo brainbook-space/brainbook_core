@@ -118,10 +118,6 @@ app.on('ready', async function () {
   assetProtocol.register(protocol)
   initWindow.close()
 
-  // setup flow
-  log.info('Running setup flow')
-  await runSetupFlow()
-
   // ui
   log.info('Initializing window menu')
   windowMenu.setup()

@@ -421,12 +421,6 @@ export function buildWindowMenu (opts = {}) {
     ]
   }
 
-  var driveMenu = {
-    label: 'Drive',
-    submenu: [
-    ]
-  }
-
   var showHistoryAccelerator = 'Ctrl+H'
 
   if (process.platform === 'darwin') {
@@ -475,71 +469,6 @@ export function buildWindowMenu (opts = {}) {
         }
       }
     ]
-  }
-
-  var developerMenu = {
-    label: 'Developer',
-    submenu: [
-      {
-        id: 'toggleDevTools',
-        label: 'Toggle DevTools',
-        enabled: !noWindows,
-        accelerator: (process.platform === 'darwin') ? 'Alt+CmdOrCtrl+I' : 'Shift+CmdOrCtrl+I',
-        click: function (item) {
-          if (tab) tab.webContents.toggleDevTools()
-        },
-        reserved: true
-      },
-      {
-        id: 'toggleEditor',
-        label: 'Toggle Editor',
-        enabled: !noWindows,
-        accelerator: 'CmdOrCtrl+B',
-        click: async function (item) {
-          if (tab) tab.togglePaneByOrigin({url: 'beaker://editor/'})
-        }
-      },
-      {
-        id: 'toggleTerminal',
-        label: 'Toggle Terminal',
-        enabled: !noWindows,
-        accelerator: 'Ctrl+`',
-        click: function (item) {
-          if (tab) tab.togglePaneByOrigin({url: 'beaker://webterm/'})
-        }
-      },
-      {
-        id: 'toggleLiveReloading',
-        label: 'Toggle Live Reloading',
-        enabled: !!isDriveSite,
-        click: function (item) {
-          if (tab) tab.toggleLiveReloading()
-        }
-      }
-    ]
-  }
-
-  if (getEnvVar('BEAKER_DEV_MODE')) {
-    developerMenu.submenu.unshift({
-      type: 'submenu',
-      label: 'Advanced Tools',
-      submenu: [
-        {
-          label: 'Reload Shell-Window',
-          enabled: !noWindows,
-          click: function () {
-            win.webContents.reloadIgnoringCache()
-          }
-        },
-        {
-          label: 'Toggle Shell-Window DevTools',
-          enabled: !noWindows,
-          click: function () {
-            win.webContents.openDevTools({mode: 'detach'})
-          }
-        }
-      ]
-    })
   }
 
   const gotoTabShortcut = index => ({
@@ -706,7 +635,7 @@ export function buildWindowMenu (opts = {}) {
   }
 
   // assemble final menu
-  var menus = [fileMenu, editMenu, viewMenu, driveMenu, historyMenu, developerMenu, windowMenu, helpMenu]
+  var menus = [fileMenu, editMenu, viewMenu, historyMenu, windowMenu, helpMenu]
   if (process.platform === 'darwin') menus.unshift(darwinMenu)
   return menus
 }
