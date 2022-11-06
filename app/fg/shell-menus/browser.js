@@ -1,8 +1,10 @@
 /* globals customElements */
-import { LitElement, html, css } from '../vendor/lit-element/lit-element'
-import { repeat } from '../vendor/lit-element/lit-html/directives/repeat'
+import { LitElement, html, css } from 'lit'
+import { repeat } from 'lit/directives/repeat'
+import { writeToClipboard } from '../lib/event-handlers'
 import * as bg from './bg-process-rpc'
 import commonCSS from './common.css'
+const path = require('path');
 
 class BrowserMenu extends LitElement {
   static get properties () {
@@ -26,9 +28,8 @@ class BrowserMenu extends LitElement {
     let browserInfo = await bg.beakerBrowser.getInfo()
     this.browserInfo = browserInfo
     this.isDarwin = browserInfo.platform === 'darwin'
-    await this.requestUpdate()
-    this.daemonStatus = await bg.beakerBrowser.getDaemonStatus()
-    this.requestUpdate()
+    // await this.requestUpdate()
+    // this.requestUpdate()
   }
 
   render () {
@@ -39,7 +40,7 @@ class BrowserMenu extends LitElement {
         <div class="section auto-updater">
           <div class="menu-item auto-updater" @click=${this.onClickRestart}>
             <i class="fa fa-arrow-circle-up"></i>
-            <span class="label">Restart to update Beaker</span>
+            <span class="label">Restart to update BrainBook</span>
           </div>
         </div>
       `
@@ -56,11 +57,6 @@ class BrowserMenu extends LitElement {
             <span class="label">My Library</span>
           </div>
 
-          <div class="menu-item" @click=${e => this.onOpenPage(e, 'beaker://history')}>
-            <img class="favicon" src="asset:favicon:beaker://history/">
-            <span class="label">History</span>
-          </div>
-
           <div class="menu-item" @click=${e => this.onOpenPage(e, 'beaker://settings')}>
             <img class="favicon" src="asset:favicon:beaker://settings/">
             <span class="label">Settings</span>
@@ -73,7 +69,7 @@ class BrowserMenu extends LitElement {
             <span class="label">Print</span>
           </div>
 
-          <div class="menu-item" @click=${e => this.onOpenPage(e, 'https://docs.beakerbrowser.com')}>
+          <div class="menu-item" @click=${e => this.onOpenPage(e, 'https://brainbook.space/docs')}>
             <i class="far fa-life-ring"></i>
             <span class="label">Help</span>
           </div>
@@ -94,7 +90,7 @@ class BrowserMenu extends LitElement {
             </div>
             ${!this.daemonStatus.holepunchable ? html`
               <div class="help">
-                <a @click=${e => this.onOpenPage(e, 'https://docs.beakerbrowser.com/help/hole-punchability')}>
+                <a @click=${e => this.onOpenPage(e, 'https://brainbook.space/docs/')}>
                   <span class="far fa-fw fa-question-circle"></span> What does this mean?
                 </a>
             </div>
@@ -105,6 +101,20 @@ class BrowserMenu extends LitElement {
     `
   }
 
+  // render () {
+
+  //   return html`
+  //     <link rel="stylesheet" href="beaker://assets/font-awesome.css">
+  //     <div class="wrapper">
+  //       <div class="section">
+  //         <div class="menu-item" @click=${e => this.onNewBookmark()}>
+  //           <i class="fas fa-plus"></i>
+  //           <span class="label">New BookMark...</span>
+  //         </div>
+  //       </div>
+  //     </div>
+  //   `
+  // }
   // events
   // =
 
@@ -129,6 +139,13 @@ class BrowserMenu extends LitElement {
       bg.shellMenus.triggerWindowMenuItemById(menu, id)
       bg.shellMenus.close()
     }
+  }
+
+  async onNewBookmark () {
+    let newUrl = await bg.beakerBrowser.getPageUrl()
+    writeToClipboard(newUrl)
+    bg.shellMenus.createTab("bookmark://_bookmark")
+    bg.shellMenus.close()
   }
 
   onPrint (e) {

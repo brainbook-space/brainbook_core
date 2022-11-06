@@ -1,9 +1,9 @@
-import { LitElement, html } from '../../../app-stdlib/vendor/lit-element/lit-element.js'
+import { LitElement, html } from 'lit'
 import _debounce from 'lodash.debounce'
 import viewCSS from '../../css/views/log.css.js'
 
 const AVAILABLE_LEVELS = ['error', 'warn', 'info', 'verbose', 'debug', 'silly']
-const AVAILABLE_CATEGORIES = ['all', 'hyper']
+const AVAILABLE_CATEGORIES = ['all']
 
 class LogSettingsView extends LitElement {
   static get properties () {

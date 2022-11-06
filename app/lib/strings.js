@@ -22,9 +22,6 @@ export function shorten (str, n = 6) {
 }
 
 export function shortenHash (str, n = 6) {
-  if (str.startsWith('hyper://')) {
-    return 'hyper://' + shortenHash(str.slice('hyper://'.length).replace(/\/$/, '')) + '/'
-  }
   if (str.length > (n + 5)) {
     return str.slice(0, n) + '..' + str.slice(-2)
   }
@@ -57,9 +54,6 @@ export function joinPath (...args) {
 export function getHostname (str) {
   try {
     const u = new URL(str)
-    if (u.protocol === 'hyper:' && u.hostname.length === 64) {
-      return 'hyper://' + shortenHash(u.hostname)
-    }
     return u.hostname
   } catch (e) {
     return str

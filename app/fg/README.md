@@ -8,6 +8,7 @@ Notable folders:
 
  - `lib` is reusable code that's specific to frontend.
  - `shell-window` is the primary shell UI of Beaker.
+ - `getDisplayMedia` is the enhanced function for brainbook to share screen.
 
  ## RPC
 

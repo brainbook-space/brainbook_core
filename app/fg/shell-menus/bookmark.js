@@ -1,5 +1,5 @@
 /* globals customElements */
-import { LitElement, html, css } from '../vendor/lit-element/lit-element'
+import { LitElement, html, css } from 'lit'
 import * as bg from './bg-process-rpc'
 import commonCSS from './common.css'
 import inputsCSS from './inputs.css'
@@ -92,6 +92,7 @@ class BookmarkMenu extends LitElement {
       await bg.bookmarks.remove(this.existingBookmark.href)
     }
     await bg.bookmarks.add({
+      profileId: 1,
       href: this.href,
       title: this.title,
       pinned: this.pinned

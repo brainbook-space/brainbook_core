@@ -1,7 +1,7 @@
 /* globals customElements */
 
 import { ipcRenderer } from 'electron'
-import { LitElement, html } from '../vendor/lit-element/lit-element'
+import { LitElement, html } from 'lit'
 import * as bg from './bg-process-rpc'
 import { fromEventStream } from '../../bg/web-apis/fg/event-target'
 import './tabs'
@@ -102,21 +102,10 @@ class ShellWindowUI extends LitElement {
       this.numWatchlistNotifications++
     })
 
-    const getDaemonStatus = async () => {
-      var status = await bg.beakerBrowser.getDaemonStatus()
-      // HACK: don't indicate 'not holepunchable' if the daemon isnt active to tell us
-      var isHolepunchable = status.holepunchable || !status.active
-      if (this.isHolepunchable !== isHolepunchable) {
-        this.isHolepunchable = isHolepunchable
-        this.stateHasChanged()
-      }
-    }
-
     // fetch initial tab state
     this.isUpdateAvailable = browserInfo.updater.state === 'downloaded'
     this.tabs = await bg.views.getState()
     this.stateHasChanged()
-    getDaemonStatus()
   }
 
   get activeTab () {

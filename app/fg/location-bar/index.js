@@ -1,9 +1,9 @@
 /* globals customElements */
 import * as rpc from 'pauls-electron-rpc'
-import { LitElement, html, css } from '../vendor/lit-element/lit-element'
-import { repeat } from '../vendor/lit-element/lit-html/directives/repeat'
-import { classMap } from '../vendor/lit-element/lit-html/directives/class-map'
-import { unsafeHTML } from '../vendor/lit-element/lit-html/directives/unsafe-html'
+import { LitElement, html, css } from 'lit'
+import { repeat } from 'lit/directives/repeat'
+import { classMap } from 'lit/directives/class-map'
+import { unsafeHTML } from 'lit/directives/unsafe-html'
 import { makeSafe } from '../../lib/strings'
 import browserManifest from '../../bg/web-apis/manifests/internal/browser'
 import historyManifest from '../../bg/web-apis/manifests/internal/history'
@@ -94,7 +94,6 @@ class LocationBar extends LitElement {
             }
           </div>
           <div class="list">
-            ${searchLink('Beaker', `beaker://desktop/?q=${encodeURIComponent(this.query)}`)}
             ${searchLink('Twitter', `https://twitter.com/search?q=${encodeURIComponent(this.query)}`)}
             ${searchLink('Reddit', `https://reddit.com/search?q=${encodeURIComponent(this.query)}`)}
             ${searchLink('GitHub', `https://github.com/search?q=${encodeURIComponent(this.query)}`)}
@@ -102,6 +101,9 @@ class LocationBar extends LitElement {
             ${searchLink('Google', `https://google.com/search?q=${encodeURIComponent(this.query)}`)}
             ${searchLink('YouTube', `https://www.youtube.com/results?search_query=${encodeURIComponent(this.query)}`)}
             ${searchLink('Wikipedia', `https://en.wikipedia.org/w/index.php?search=${encodeURIComponent(this.query)}`)}
+            ${searchLink('Google Scholar', `https://scholar.google.com/`)}
+            ${searchLink('Webopedia', `https://www.webopedia.com/`)}
+            ${searchLink('Internet Archive', `https://archive.org/`)}
             ${''/* TODO restore at some point esearchLink('Beaker', `beaker://search/?q=${encodeURIComponent(this.query)}`) */}
           </div>
         </div>

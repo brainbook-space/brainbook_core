@@ -1,4 +1,4 @@
-import {css} from '../../vendor/lit-element/lit-element.js'
+import {css} from 'lit'
 
 const cssStr = css`
 .dropdown {
@@ -114,7 +114,7 @@ const cssStr = css`
 }
 
 .dropdown-items.very-roomy .dropdown-item {
-  padding: 16px 40px 16px 20px;
+  padding: 20px 30px;
 }
 
 .dropdown-items.rounded {
@@ -258,6 +258,5 @@ const cssStr = css`
 .dropdown-item:last-of-type {
   border-radius: 0 0 2px 2px;
 }
-
 `
 export default cssStr

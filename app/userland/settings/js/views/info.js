@@ -1,4 +1,4 @@
-import { LitElement, html } from '../../../app-stdlib/vendor/lit-element/lit-element.js'
+import { LitElement, html } from 'lit'
 import viewCSS from '../../css/views/general.css.js'
 
 class InfoSettingsView extends LitElement {
@@ -21,7 +21,7 @@ class InfoSettingsView extends LitElement {
 
   async load () {
     this.browserInfo = await beaker.browser.getInfo()
-    this.daemonStatus = await beaker.browser.getDaemonStatus()
+    this.daemonStatus = false
     console.log('loaded', {
       browserInfo: this.browserInfo,
       daemonStatus: this.daemonStatus
@@ -37,7 +37,7 @@ class InfoSettingsView extends LitElement {
     return html`
       <link rel="stylesheet" href="beaker://assets/font-awesome.css">
       <div class="section">
-        <h2 id="information" class="subtitle-heading">About Beaker</h2>
+        <h2 id="information" class="subtitle-heading">About BrainBook</h2>
         <p>
           <strong>Version</strong>:
           ${this.browserInfo.version}
@@ -50,7 +50,6 @@ class InfoSettingsView extends LitElement {
             <li><strong>Electron:</strong> ${this.browserInfo.electronVersion}</li>
             <li><strong>Chromium:</strong> ${this.browserInfo.chromiumVersion}</li>
             <li><strong>Node:</strong> ${this.browserInfo.nodeVersion}</li>
-            <li><strong>Hyperspace API:</strong> ${this.daemonStatus.apiVersion}</li>
           </ul>
         ` : ''}
         <p><strong>User data</strong>: ${this.browserInfo.paths.userData}</p>

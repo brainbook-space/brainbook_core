@@ -1,8 +1,8 @@
-import {css} from 'beaker://app-stdlib/vendor/lit-element/lit-element.js'
-import spinnerCSS from 'beaker://app-stdlib/css/com/spinner.css.js'
+import {css,unsafeCSS} from 'lit'
+import spinnerCSS from '../../../app-stdlib/css/com/spinner.css.js'
 
 const cssStr = css`
-${spinnerCSS}
+${unsafeCSS(spinnerCSS)}
 
 :host {
   display: block;

@@ -5,7 +5,6 @@ import * as modals from './subwindows/modals'
 import { toggleShellInterface, getAddedWindowSettings } from './windows'
 import { download } from './downloads'
 import * as settingsDb from '../dbs/settings'
-
 // NOTE
 // subtle but important!!
 // the menu instance needs to be kept in the global scope
@@ -21,7 +20,6 @@ export default function registerContextMenu () {
     webContents.on('context-menu', async (e, props) => {
       var menuItems = []
       const { mediaFlags, editFlags } = props
-      const isHyperdrive = props.pageURL.startsWith('hyper://')
       const hasText = props.selectionText.trim().length > 0
       const can = type => editFlags[`can${type}`] && hasText
       const isMisspelled = props.misspelledWord
@@ -201,6 +199,7 @@ export default function registerContextMenu () {
       }
       menuItems.push(createMenuItem('close-pane', {webContents, tab: targetTab}))
       menuItems.push({ type: 'separator' })
+      menuItems.push(createMenuItem('inspect-element', {webContents, tab: targetTab, x: props.x, y: props.y}))
       menuItems.push({
         label: 'Export Page As...',
         click: downloadPrompt('pageURL', '.html')
@@ -209,24 +208,6 @@ export default function registerContextMenu () {
         label: 'Print...',
         click: () => webContents.print()
       })
-      menuItems.push({ type: 'separator' })
-
-      if (isHyperdrive) {
-        menuItems.push({
-          label: 'Edit Page Source',
-          click: async (item, win) => {
-            if (targetTab) targetTab.createOrFocusPaneByOrigin({url: 'beaker://editor/', setActive: true})
-          }
-        })
-        menuItems.push({
-          label: 'Explore Files',
-          click: async (item, win) => {
-            if (targetTab) targetTab.createOrFocusPaneByOrigin({url: 'beaker://explorer/', setActive: true})
-          }
-        })
-      }
-      menuItems.push({ type: 'separator' })
-      menuItems.push(createMenuItem('inspect-element', {webContents, tab: targetTab, x: props.x, y: props.y}))
 
       // show menu
       menuInstance = Menu.buildFromTemplate(menuItems)

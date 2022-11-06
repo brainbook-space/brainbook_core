@@ -11,7 +11,6 @@ import EventEmitter from 'events'
 import LRU from 'lru'
 const exec = require('util').promisify(require('child_process').exec)
 import * as logLib from './logger'
-import * as adblocker from './adblocker'
 const logger = logLib.child({category: 'browser'})
 import * as settingsDb from './dbs/settings'
 import { open as openUrl } from './open-url'
@@ -128,25 +127,8 @@ export async function setup () {
         // disallow all other requesters
         return cb({cancel: true})
       }
-    } else if (details.url.startsWith('hyper://private')) {
-      if (!details.webContentsId) {
-        if (details.resourceType === 'mainFrame') {
-          // allow toplevel navigation
-          return cb({cancel: false})
-        } else {
-          // not enough info, cancel
-          return cb({cancel: true})
-        }
-      }
-      let wc = webContents.fromId(details.webContentsId)
-      if (/^(beaker:\/\/|hyper:\/\/private\/)/.test(wc.getURL())) {
-        // allow access from self and from beaker
-        cb({cancel: false})
-      } else {
-        cb({cancel: true})
-      }
     } else {
-      adblocker.onBeforeRequest(details, cb)
+      return cb({cancel: false})
     }
   })
 
@@ -164,20 +146,21 @@ export async function setup () {
     })
     cb(request.errorCode)
   })
+
+  // const browserPreload = path.join(app.getAppPath(), 'fg', 'getDisplayMedia', 'preload2.js')
+  // session.defaultSession.setPreloads([browserPreload])
+  
 }
 
 export const WEBAPI = {
   createEventsStream,
   getInfo,
-  getDaemonStatus,
-  getDaemonNetworkStatus,
   checkForUpdates,
   restartBrowser,
 
   getSetting,
   getSettings,
   setSetting,
-  updateAdblocker,
   updateSetupState,
   migrate08to09,
   setStartPageBackgroundImage,
@@ -189,6 +172,8 @@ export const WEBAPI = {
   fetchBody,
   downloadURL,
 
+  convertDat,
+
   getResourceContentType,
   getCertificate,
 
@@ -197,13 +182,8 @@ export const WEBAPI = {
   uploadFavicon,
   imageToIco,
 
-  reconnectHyperdriveDaemon () {
-    return
-  },
-
   executeShellWindowCommand,
   toggleSiteInfo,
-  toggleLiveReloading,
   setWindowDimensions,
   setWindowDragModeEnabled,
   moveWindow,
@@ -252,6 +232,13 @@ export function fetchBody (url) {
 
 export async function downloadURL (url) {
   this.sender.downloadURL(url)
+}
+
+export async function convertDat (url) {
+  // var win = findWebContentsParentWindow(this.sender)
+  // var key = await datDns.resolveName(url)
+  // var driveUrl = await convertDatArchive(win, key)
+  // tabManager.create(win, driveUrl, {setActive: true})
 }
 
 export function getResourceContentType (url) {
@@ -344,11 +331,6 @@ async function toggleSiteInfo (override) {
   } else {
     siteInfo.toggle(win)
   }
-}
-
-export async function toggleLiveReloading (enabled) {
-  var win = findWebContentsParentWindow(this.sender)
-  tabManager.getActive(win).toggleLiveReloading(enabled)
 }
 
 export async function setWindowDimensions ({width, height} = {}) {
@@ -515,15 +497,6 @@ export function getInfo () {
   }
 }
 
-export async function getDaemonStatus () {
-  return false
-}
-
-export async function getDaemonNetworkStatus () {
-  // bit of a hack, this
-  return []
-}
-
 export function checkForUpdates (opts = {}) {
   // dont overlap
   if (updaterState != UPDATER_STATUS_IDLE) { return }
@@ -543,16 +516,16 @@ export function checkForUpdates (opts = {}) {
 }
 
 export function restartBrowser () {
-  if (updaterState == UPDATER_STATUS_DOWNLOADED) {
-    // run the update installer
-    autoUpdater.quitAndInstall()
-    logger.info('[AUTO-UPDATE] Quitting and installing.')
-  } else {
-    logger.info('Restarting Beaker by restartBrowser()')
-    // do a simple restart
-    app.relaunch()
-    setTimeout(() => app.exit(0), 1e3)
-  }
+  // if (updaterState == UPDATER_STATUS_DOWNLOADED) {
+  //   // run the update installer
+  //   autoUpdater.quitAndInstall()
+  //   logger.info('[AUTO-UPDATE] Quitting and installing.')
+  // } else {
+  //   logger.info('Restarting Beaker by restartBrowser()')
+  //   // do a simple restart
+  //   app.relaunch()
+  //   setTimeout(() => app.exit(0), 1e3)
+  // }
 }
 
 export function getSetting (key) {
@@ -565,10 +538,6 @@ export function getSettings () {
 
 export function setSetting (key, value) {
   return settingsDb.set(key, value)
-}
-
-export function updateAdblocker () {
-  return adblocker.setup()
 }
 
 export async function migrate08to09 () {
@@ -699,7 +668,7 @@ async function gotoUrl (url) {
   getSenderTab(this.sender).loadURL(url)
 }
 
-async function getPageUrl () {
+export async function getPageUrl () {
   return getSenderTab(this.sender).url
 }
 
@@ -760,8 +729,8 @@ function setUpdaterState (state) {
 function getAutoUpdaterFeedSettings () {
   return {
     provider: 'github',
-    repo: 'beaker',
-    owner: 'beakerbrowser',
+    repo: 'brainbook',
+    owner: 'brainbook',
     vPrefixedTagName: false
   }
 }

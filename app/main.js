@@ -16,9 +16,6 @@ import { join } from 'path'
 import { getEnvVar } from './bg/lib/env'
 import * as logger from './bg/logger'
 import * as beakerBrowser from './bg/browser'
-import * as adblocker from './bg/adblocker'
-import * as analytics from './bg/analytics'
-import * as portForwarder from './bg/nat-port-forwarder'
 import dbs from './bg/dbs/index'
 import * as webapis from './bg/web-apis/bg'
 
@@ -34,7 +31,6 @@ import * as permissions from './bg/ui/permissions'
 import * as beakerProtocol from './bg/protocols/beaker'
 import * as assetProtocol from './bg/protocols/asset'
 
-import * as testDriver from './bg/test-driver'
 import * as openURL from './bg/open-url'
 
 // setup
@@ -96,7 +92,6 @@ app.on('ready', async function () {
   beakerProtocol.register(protocol)
   webapis.setup()
   initWindow.open()
-  portForwarder.setup()
 
   // setup databases
   log.info('Initializing databases')
@@ -150,7 +145,6 @@ app.on('will-quit', async (e) => {
 
 app.on('quit', () => {
   log.info('Program quit')
-  portForwarder.closePort()
 })
 
 app.on('custom-ready-to-show', () => {

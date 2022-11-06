@@ -1,9 +1,8 @@
-import { LitElement, html } from 'beaker://app-stdlib/vendor/lit-element/lit-element.js'
-import * as toast from 'beaker://app-stdlib/js/com/toast.js'
-import { findParent } from 'beaker://app-stdlib/js/dom.js'
-import { EditBookmarkPopup } from 'beaker://app-stdlib/js/com/popups/edit-bookmark.js'
+import { LitElement, html } from 'lit'
+import * as toast from '../../app-stdlib/js/com/toast.js'
+import { findParent } from '../../app-stdlib/js/dom.js'
+import { EditBookmarkPopup } from '../../app-stdlib/js/com/popups/edit-bookmark.js'
 import mainCSS from '../css/main.css.js'
-import './views/drives.js'
 import './views/bookmarks.js'
 import './views/history.js'
 import './views/downloads.js'
@@ -28,7 +27,7 @@ export class LibraryApp extends LitElement {
     this.view = ''
     const getView = () => {
       var view = location.pathname.slice(1)
-      return view === '' ? 'drives' : view
+      return view === '' ? 'bookmarks' : view
     }
     this.setView(getView())
     window.addEventListener('popstate', (event) => {
@@ -88,16 +87,12 @@ export class LibraryApp extends LitElement {
       <div class="layout">
         <nav>
           <div class="page-nav">
-            ${pageNav('drives', html`<span class="fas fa-fw fa-sitemap"></span> <span class="label">Hyperdrives</span>`)}
             ${pageNav('bookmarks', html`<span class="far fa-fw fa-star"></span> <span class="label">Bookmarks</span>`)}
             ${pageNav('history', html`<span class="fas fa-fw fa-history"></span> <span class="label">History</span>`)}
             ${pageNav('downloads', html`<span class="fas fa-fw fa-arrow-down"></span> <span class="label">Downloads</span>`)}
           </div>
         </nav>
         <main>
-          ${this.view === 'drives' ? html`
-            <drives-view class="full-size" .filter=${this.filter} loadable></drives-view>
-          ` : ''}
           ${this.view === 'bookmarks' ? html`
             <bookmarks-view class="full-size" .filter=${this.filter} loadable></bookmarks-view>
           ` : ''}
@@ -113,11 +108,6 @@ export class LibraryApp extends LitElement {
   }
 
   renderNewBtn () {
-    if (this.view === 'drives') {
-      return html`
-        <span class="new-btn"><button @click=${this.onCreateDrive}>New Hyperdrive</button></span>
-      `
-    }
     if (this.view === 'bookmarks') {
       return html`
         <span class="new-btn"><button @click=${this.onCreateBookmark}>New Bookmark</button></span>
@@ -128,15 +118,6 @@ export class LibraryApp extends LitElement {
 
   // events
   // =
-
-  async onCreateDrive () {
-    var drive = await beaker.hyperdrive.createDrive()
-    toast.create('Drive created')
-    beaker.browser.openUrl(drive.url, {setActive: true, addedPaneUrls: ['beaker://editor/']})
-    if (this.view === 'drives') {
-      this.shadowRoot.querySelector('drives-view').load()
-    }
-  }
 
   async onCreateBookmark () {
     await EditBookmarkPopup.create()

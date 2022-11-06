@@ -37,7 +37,7 @@ var preloadedNewTabs = {} // map of {[win.id]: Tab}
 var lastSelectedTabIndex = {} // map of {[win.id]: Number}
 var closedItems = {} // map of {[win.id]: Array<Object>}
 var windowEvents = {} // mapof {[win.id]: EventEmitter}
-var defaultUrl = 'beaker://desktop/'
+var defaultUrl = 'beaker://desktop'
 
 // classes
 // =
@@ -64,8 +64,6 @@ class Tab extends EventEmitter {
     definePrimaryPanePassthroughFn(this, 'hideInpageFind')
     definePrimaryPanePassthroughFn(this, 'setInpageFindString')
     definePrimaryPanePassthroughFn(this, 'moveInpageFind')
-    definePrimaryPanePassthroughFn(this, 'toggleLiveReloading')
-    definePrimaryPanePassthroughFn(this, 'stopLiveReloading')
 
     // browser state
     this.isHidden = opts.isHidden // is this tab hidden from the user? used for the preloaded tab and background tabs
@@ -615,14 +613,8 @@ export async function setup () {
     }
   })
 
-  // track peer-counts
-  function iterateTabs (cb) {
-    for (let winId in activeTabs) {
-      for (let tab of activeTabs[winId]) {
-        cb(tab)
-      }
-    }
-  }
+  // track daemon connectivity
+
 }
 
 export function getAll (win) {
@@ -1289,10 +1281,6 @@ rpc.exportAPI('background-process-views', viewsRPCManifest, {
 
   async resetZoom (index) {
     zoom.zoomReset(getByIndex(getWindow(this.sender), index))
-  },
-
-  async toggleLiveReloading (index, enabled) {
-    getByIndex(getWindow(this.sender), index).toggleLiveReloading(enabled)
   },
 
   async toggleDevTools (index) {

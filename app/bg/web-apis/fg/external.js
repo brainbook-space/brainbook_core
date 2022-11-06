@@ -2,7 +2,6 @@ import { fromEventStream, EventTargetFromStream } from './event-target'
 import errors from 'beaker-error-constants'
 import capabilitiesManifest from '../manifests/external/capabilities'
 import contactsManifest from '../manifests/external/contacts'
-import markdownManifest from '../manifests/external/markdown'
 import panesManifest from '../manifests/external/panes'
 import peersocketsManifest from '../manifests/external/peersockets'
 import shellManifest from '../manifests/external/shell'
@@ -12,7 +11,7 @@ const RPC_OPTS = { timeout: false, errors }
 export const setup = function (rpc) {
   var capabilities = rpc.importAPI('capabilities', capabilitiesManifest, RPC_OPTS)
   var contacts = rpc.importAPI('contacts', contactsManifest, RPC_OPTS)
-  var markdown = rpc.importAPI('markdown', markdownManifest, RPC_OPTS)
+  var markdown = null
   var shell = rpc.importAPI('shell', shellManifest, RPC_OPTS)
 
   if (window.location.protocol !== 'beaker:') {

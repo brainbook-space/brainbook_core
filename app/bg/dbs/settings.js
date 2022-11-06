@@ -39,16 +39,16 @@ export const setup = async function (opts) {
     custom_start_page: 'blank',
     new_tab: 'beaker://desktop/',
     new_tabs_in_foreground: 0,
-    run_background: 1,
+    run_background: 0,
+    run_develop_mode: 0,
     default_zoom: 0,
     browser_theme: 'system',
-    analytics_enabled: 1,
+    analytics_enabled: 0,
     extended_network_index: 'default',
     extended_network_index_url: '',
     search_engines: [
-      {name: 'DuckDuckGo', url: 'https://www.duckduckgo.com/', selected: true},
-      {name: 'Beaker', url: 'beaker://desktop/'},
-      {name: 'Google', url: 'https://www.google.com/search'}
+      {name: 'Google', url: 'https://www.google.com/search', selected: true},
+      {name: 'DuckDuckGo', url: 'https://www.duckduckgo.com/'},
     ],
     adblock_lists: [
       {name: 'EasyList', url: 'https://easylist.to/easylist/easylist.txt', selected: true},
@@ -173,6 +173,13 @@ migrations = [
     db.exec(`
       INSERT INTO settings (key, value) VALUES ('start_page_background_image', '');
       PRAGMA user_version = 2
+    `, cb)
+  },
+  // version 3
+  function (cb) {
+    db.exec(`
+      INSERT INTO settings (key, value) VALUES ('run_develop_mode', 0);
+      PRAGMA user_version = 3
     `, cb)
   }
 ]

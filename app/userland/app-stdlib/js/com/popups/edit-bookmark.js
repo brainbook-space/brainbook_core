@@ -1,5 +1,5 @@
 /* globals beaker */
-import { html, css } from '../../../vendor/lit-element/lit-element.js'
+import { html, css } from 'lit'
 import { BasePopup } from './base.js'
 import popupsCSS from '../../../css/com/popups.css.js'
 import { normalizeUrl, createResourceSlug, joinPath } from '../../strings.js'
@@ -109,10 +109,10 @@ export class EditBookmarkPopup extends BasePopup {
       <form @submit=${this.onSubmit}>
         <div>
           <label for="href-input">URL</label>
-          <input required type="text" id="href-input" name="href" value="${this.bookmark?.href || ''}" placeholder="E.g. beakerbrowser.com" />
+          <input required type="text" id="href-input" name="href" value="${this.bookmark?.url || ''}" placeholder="E.g. brainbook.org" />
 
           <label for="title-input">Title</label>
-          <input required type="text" id="title-input" name="title" value="${this.bookmark?.title || ''}" placeholder="E.g. Beaker Browser" />
+          <input required type="text" id="title-input" name="title" value="${this.bookmark?.title || ''}" placeholder="E.g. BrainBook Browser" />
 
           ${typeof beaker.bookmarks === 'undefined' ? '' : html`
             <label class="checkbox" for="pinned-input">
@@ -149,17 +149,10 @@ export class EditBookmarkPopup extends BasePopup {
     }
     console.log(b)
     if (typeof beaker.bookmarks === 'undefined') {
-      // userland
-      b.href = normalizeUrl(b.href)
-      let drive = beaker.hyperdrive.drive('hyper://private/')
-      let slug = createResourceSlug(b.href, b.title)
-      let filename = await getAvailableName('/bookmarks', slug, drive, 'goto') // avoid collisions
-      let path = joinPath('/bookmarks', filename)
-      await drive.writeFile(path, '', {metadata: {href: b.href, title: b.title}})
     } else {
       // builtin
-      if (this.bookmark && b.href !== this.bookmark.href) {
-        await beaker.bookmarks.remove(this.bookmark.href)
+      if (this.bookmark && b.href !== this.bookmark.url) {
+        await beaker.bookmarks.remove(this.bookmark.url)
       }
       await beaker.bookmarks.add(b)
     }
@@ -170,7 +163,7 @@ export class EditBookmarkPopup extends BasePopup {
   async onDelete (e) {
     e.preventDefault()
     e.stopPropagation()
-    await beaker.bookmarks.remove(this.bookmark.href)
+    await beaker.bookmarks.remove(this.bookmark.url)
     this.dispatchEvent(new CustomEvent('resolve'))
   }
 }

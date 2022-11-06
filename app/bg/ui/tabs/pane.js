@@ -16,6 +16,7 @@ import { DRIVE_KEY_REGEX } from '../../../lib/strings'
 import * as sitedataDb from '../../dbs/sitedata'
 import * as historyDb from '../../dbs/history'
 import * as bookmarksDb from '../../dbs/bookmarks'
+const package_name = require(__dirname+'/package.json').name
 
 const ERR_ABORTED = -3
 const ERR_CONNECTION_REFUSED = -102
@@ -221,12 +222,8 @@ export class Pane extends EventEmitter {
         }
       }
       if (urlp.protocol === 'beaker:') {
-        if (urlp.hostname === 'diff') return 'BrainBook Diff/Merge Tool'
-        if (urlp.hostname === 'explorer') return 'BrainBook Files Explorer'
-        if (urlp.hostname === 'history') return 'BrainBook History'
         if (urlp.hostname === 'library') return 'BrainBook Library'
         if (urlp.hostname === 'settings') return 'BrainBook Settings'
-        if (urlp.hostname === 'webterm') return 'BrainBook Webterm'
         return 'BrainBook'
       }
       return hostname + (urlp.port ? `:${urlp.port}` : '')

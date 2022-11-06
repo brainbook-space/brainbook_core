@@ -1,8 +1,8 @@
-import { LitElement, html } from 'beaker://app-stdlib/vendor/lit-element/lit-element.js'
-import { repeat } from 'beaker://app-stdlib/vendor/lit-element/lit-html/directives/repeat.js'
-import { writeToClipboard } from 'beaker://app-stdlib/js/clipboard.js'
-import bytes from 'beaker://app-stdlib/vendor/bytes/index.js'
-import { toNiceDomain } from 'beaker://app-stdlib/js/strings.js'
+import { LitElement, html } from 'lit'
+import { repeat } from 'lit/directives/repeat.js'
+import { writeToClipboard } from '../../../app-stdlib/js/clipboard.js'
+import bytes from 'bytes'
+import { toNiceDomain } from '../../../app-stdlib/js/strings.js'
 import downloadsCSS from '../../css/views/downloads.css.js'
 
 export class DownloadsView extends LitElement {

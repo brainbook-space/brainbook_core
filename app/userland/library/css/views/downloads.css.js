@@ -1,12 +1,12 @@
-import {css} from 'beaker://app-stdlib/vendor/lit-element/lit-element.js'
-import buttonsCSS from 'beaker://app-stdlib/css/buttons2.css.js'
-import tooltipCSS from 'beaker://app-stdlib/css/tooltip.css.js'
-import spinnerCSS from 'beaker://app-stdlib/css/com/spinner.css.js'
+import {css,unsafeCSS} from 'lit'
+import buttonsCSS from '../../../app-stdlib/css/buttons2.css.js'
+import tooltipCSS from '../../../app-stdlib/css/tooltip.css.js'
+import spinnerCSS from '../../../app-stdlib/css/com/spinner.css.js'
 
 const cssStr = css`
-${buttonsCSS}
-${tooltipCSS}
-${spinnerCSS}
+${unsafeCSS(buttonsCSS)}
+${unsafeCSS(tooltipCSS)}
+${unsafeCSS(spinnerCSS)}
 
 :host {
   display: block;

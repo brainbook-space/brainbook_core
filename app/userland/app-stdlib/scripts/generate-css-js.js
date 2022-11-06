@@ -1,8 +1,6 @@
 const fs = require('fs')
 const path = require('path')
 
-const litElementPath = path.join(__dirname, '..', 'vendor', 'lit-element', 'lit-element.js')
-console.log('Path:', litElementPath)
 const cssdir = path.join(__dirname, '..', 'css')
 handleFolder(cssdir)
 
@@ -29,9 +27,8 @@ function handleCSSFile (cssPath) {
 
   // replace the css imports with js imports
   const [newCss, imports] = extractAndReplaceImports(css)
-
   // write the css-js file
-  fs.writeFileSync(cssJsPath, `import {css} from '${path.relative(path.dirname(cssPath), litElementPath)}'
+  fs.writeFileSync(cssJsPath, `import {css} from 'lit'
 ${imports}
 const cssStr = css\`
 ${newCss}

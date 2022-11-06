@@ -1,4 +1,4 @@
-import {css} from '../vendor/lit-element/lit-element.js'
+import {css} from 'lit'
 import resetcss from './reset.css.js'
 import colorscss from './colors.css.js'
 const cssStr = css`
@@ -56,7 +56,7 @@ ${colorscss}
 }
 
 .btn.plain:hover {
-  color: var(--color-text);
+  color: var(--text-color--default);
   background: none;
 }
 

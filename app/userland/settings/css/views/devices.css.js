@@ -1,14 +1,14 @@
-import {css} from '../../../app-stdlib/vendor/lit-element/lit-element.js'
+import {css, unsafeCSS} from 'lit'
 import colorsCSS from '../../../app-stdlib/css/colors.css.js'
 import buttonsCSS from '../../../app-stdlib/css/buttons2.css.js'
 import tooltipCSS from '../../../app-stdlib/css/tooltip.css.js'
 import spinnerCSS from '../../../app-stdlib/css/com/spinner.css.js'
 
 const cssStr = css`
-${colorsCSS}
-${buttonsCSS}
-${tooltipCSS}
-${spinnerCSS}
+${unsafeCSS(colorsCSS)}
+${unsafeCSS(buttonsCSS)}
+${unsafeCSS(tooltipCSS)}
+${unsafeCSS(spinnerCSS)}
 
 :host {
   display: block;

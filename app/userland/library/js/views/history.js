@@ -1,5 +1,5 @@
-import { LitElement, html } from 'beaker://app-stdlib/vendor/lit-element/lit-element.js'
-import { repeat } from 'beaker://app-stdlib/vendor/lit-element/lit-html/directives/repeat.js'
+import { LitElement, html } from 'lit'
+import { repeat } from 'lit/directives/repeat.js'
 import css from '../../css/views/history.css.js'
 
 export class HistoryView extends LitElement {

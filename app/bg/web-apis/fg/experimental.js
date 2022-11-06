@@ -11,8 +11,8 @@ export const setup = function (rpc) {
   const experimental = {}
   const opts = {timeout: false, errors}
 
-  // hyperdrive or internal only
-  if (['beaker:', 'hyper:'].includes(window.location.protocol)) {
+  // internal only
+  if (['beaker:'].includes(window.location.protocol)) {
     const globalFetchRPC = rpc.importAPI('experimental-global-fetch', experimentalGlobalFetchManifest, opts)
     const capturePageRPC = rpc.importAPI('experimental-capture-page', experimentalCapturePageManifest, opts)
     const datPeersRPC = rpc.importAPI('experimental-dat-peers', experimentalDatPeersManifest, opts)
@@ -31,10 +31,6 @@ export const setup = function (rpc) {
         })
         return new Response(responseData.body, responseData)
       } catch (e) {
-        if (e.message === 'Can only send requests to http or https URLs' && request.url.startsWith('hyper://')) {
-          // we can just use `fetch` for hyper:// URLs, because hyper:// does not enforce CORS
-          return fetch(input, init)
-        }
         throw e
       }
     }

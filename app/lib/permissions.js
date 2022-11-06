@@ -221,7 +221,6 @@ export function renderPermDesc ({html, bg, url, permId, permParam, permOpts}) {
   const openUrl = url => e => {
     e.preventDefault()
     e.stopPropagation()
-    url = isDriveRegex.test(url) ? `hyper://${url}/` : url
     if (api) api.createTab(url)
     else beaker.browser.openUrl(url, {setActive: true})
   }
@@ -249,33 +248,6 @@ export function renderPermDesc ({html, bg, url, permId, permParam, permOpts}) {
 
     case 'download':
       return html`<span>Download ${permOpts.filename}</span>`
-
-    case 'createDrive':
-      if (permOpts.tags) return `Create a new hyperdrive tagged "${permOpts.tags.join(', ')}"`
-      if (permOpts.title) return `Create a new hyperdrive, "${permOpts.title}"`
-      return 'Create a new hyperdrive'
-
-    case 'modifyDrive':
-      {
-        let viewArchive = openUrl(permParam)
-        return html`<span>Write files to <a @click=${viewArchive}>${permOpts.title}</a></span>`
-      }
-
-    case 'deleteDrive':
-      {
-        let viewArchive = openUrl(permParam)
-        return html`<span>Remove the hyperdrive <a @click=${viewArchive}>${permOpts.title}</a> from your library</span>`
-      }
-
-    case 'tagDrive':
-      {
-        let viewArchive = openUrl(permParam)
-        return html`<span>Add the tags "${permOpts.tags.join(', ')}" to the hyperdrive <a @click=${viewArchive}>${permOpts.title}</a></span>`
-      }
-
-    case 'listDrives':
-      if (permParam) return `Read the hyperdrives tagged "${permParam}" in your library`
-      return `Read all the hyperdrives in your library`
 
     case 'experimentalLibraryRequestAdd':
       {

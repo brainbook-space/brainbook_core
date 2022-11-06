@@ -1,16 +1,12 @@
 /* globals customElements */
 import { ipcRenderer } from 'electron'
-import { LitElement, html, css } from '../../vendor/lit-element/lit-element'
-import { classMap } from '../../vendor/lit-element/lit-html/directives/class-map'
+import { LitElement, html, css } from 'lit'
+import { classMap } from 'lit/directives/class-map'
 import { queryAutocomplete } from '../../lib/location'
-import prettyHash from 'pretty-hash'
 import * as bg from '../bg-process-rpc'
 import buttonResetCSS from './button-reset.css'
 import tooltipCSS from './tooltip.css'
 import './site-info'
-
-const isHyperHashRegex = /^[a-z0-9]{64}/i
-const NETWORK_STATS_POLL_INTERVAL = 5000 // ms
 
 class NavbarLocation extends LitElement {
   static get properties () {
@@ -78,13 +74,6 @@ class NavbarLocation extends LitElement {
     this._isAutocompleteOpen = false
     this.dontShowAutocompleteOnNextFocus = false // helper to avoid showing autocomplete on new tab
 
-    setInterval(async () => {
-      if (!this.url.startsWith('hyper://')) return
-      var state = await bg.views.getNetworkState('active')
-      this.peers = state?.peers?.length || 0
-      this.requestUpdate()
-    }, NETWORK_STATS_POLL_INTERVAL)
-
     // listen for commands from the main process
     ipcRenderer.on('command', this.onCommand.bind(this))
   }
@@ -104,10 +93,6 @@ class NavbarLocation extends LitElement {
 
   get isBeaker () {
     return this.url.startsWith('beaker://')
-  }
-
-  get isHyperdrive () {
-    return this.url.startsWith('hyper://')
   }
 
   get modifiedUrl () {
@@ -160,14 +145,10 @@ class NavbarLocation extends LitElement {
       </shell-window-navbar-site-info>
       ${this.renderLocation()}
       ${this.renderZoom()}
-      ${this.renderDatConverterBtn()}
-      ${this.renderLiveReloadingBtn()}
-      ${this.renderFolderSyncBtn()}
-      ${this.renderPeers()}
       ${this.renderDonateBtn()}
       ${''/* DISABLED this.renderShareBtn()*/}
       ${this.renderBookmarkBtn()}
-      ${this.renderSiteBtn()}
+      ${''/*this.renderSiteBtn()*/}
     `
   }
 
@@ -197,7 +178,7 @@ class NavbarLocation extends LitElement {
         </div>
       `
     }
-    if (/^(hyper|http|https|beaker|dat):\/\//.test(this.url)) {
+    if (/^(http|https|beaker|dat):\/\//.test(this.url)) {
       try {
         var { protocol, host, pathname, search, hash } = new URL(this.url)
         // TODO just show path?
@@ -207,16 +188,6 @@ class NavbarLocation extends LitElement {
         //   </div>
         // `
         var hostVersion
-        if (protocol === 'hyper:') {
-          let match = /(.*)\+(.*)/.exec(host)
-          if (match) {
-            host = match[1]
-            hostVersion = '+' + match[2]
-          }
-          if (isHyperHashRegex.test(host)) {
-            host = prettyHash(host)
-          }
-        }
         var cls = 'protocol'
         // if (['beaker:'].includes(protocol)) cls += ' protocol-trusted'
         // if (['https:'].includes(protocol) && !this.loadError) cls += ' protocol-trusted'
@@ -265,41 +236,6 @@ class NavbarLocation extends LitElement {
     `
   }
 
-  renderDatConverterBtn () {
-    if (this.url.startsWith('dat:')) {
-      return html`
-        <button class="dat-converter" title="Convert to Hyperdrive" @click=${this.onClickConvertDat}>
-          Convert this site to Hyperdrive
-        </button>
-      `
-    }
-    return ''
-  }
-
-  renderLiveReloadingBtn () {
-    if (!this.isLiveReloading) {
-      return ''
-    }
-    return html`
-      <button class="live-reload" @click=${this.onClickLiveReloadingBtn} title="Live reloading enabled">
-        <i class="fa fa-bolt"></i>
-      </button>
-    `
-  }
-
-  renderFolderSyncBtn () {
-    if (!this.folderSyncPath) {
-      return ''
-    }
-    var cls = classMap({'folder-sync': true})
-    return html`
-      <button class=${cls} @click=${this.onClickFolderSyncBtn} title="Folder Sync">
-        <i class="fas fa-sync"></i>
-        <i class="far fa-folder-open"></i>
-      </button>
-    `
-  }
-
   renderDonateBtn () {
     if (!this.donateLinkHref) {
       return ''
@@ -308,18 +244,6 @@ class NavbarLocation extends LitElement {
     return html`
       <button class="${cls}" @click=${this.onClickDonateMenu}>
         <i class="fa fa-donate"></i>
-      </button>
-    `
-  }
-
-  renderPeers () {
-    if (!this.isHyperdrive) {
-      return ''
-    }
-    var cls = classMap({peers: true, pressed: this.isPeersMenuOpen})
-    return html`
-      <button class="${cls}" @click=${this.onClickPeersMenu}>
-        <span class="fas fa-share-alt"></span> ${this.peers}
       </button>
     `
   }
@@ -496,11 +420,10 @@ class NavbarLocation extends LitElement {
 
   onClickConvertDat (e) {
     var { host } = new URL(this.url)
-    // bg.beakerBrowser.convertDat(host)
+    bg.beakerBrowser.convertDat(host)
   }
 
   onClickLiveReloadingBtn (e) {
-    bg.views.toggleLiveReloading('active')
     this.isLiveReloading = false
   }
 

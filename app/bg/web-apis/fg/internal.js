@@ -3,6 +3,7 @@ import errors from 'beaker-error-constants'
 import loggerManifest from '../manifests/internal/logger'
 import beakerBrowserManifest from '../manifests/internal/browser'
 import bookmarksManifest from '../manifests/internal/bookmarks'
+import datLegacyManifest from '../manifests/internal/dat-legacy'
 import downloadsManifest from '../manifests/internal/downloads'
 import drivesManifest from '../manifests/internal/drives'
 import folderSyncManifest from '../manifests/internal/folder-sync'
@@ -19,6 +20,7 @@ export const setup = function (rpc) {
   const bookmarksRPC = rpc.importAPI('bookmarks', bookmarksManifest, opts)
   const downloadsRPC = rpc.importAPI('downloads', downloadsManifest, opts)
   const drivesRPC = rpc.importAPI('drives', drivesManifest, opts)
+  const datLegacyRPC = rpc.importAPI('dat-legacy', datLegacyManifest, opts)
   const folderSyncRPC = rpc.importAPI('folder-sync', folderSyncManifest, opts)
   const historyRPC = rpc.importAPI('history', historyManifest, opts)
   const sitedataRPC = rpc.importAPI('sitedata', sitedataManifest, opts)

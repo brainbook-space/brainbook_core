@@ -1,4 +1,4 @@
-import {css} from '../vendor/lit-element/lit-element.js'
+import {css} from 'lit'
 
 const cssStr = css`
 textarea {
@@ -10,7 +10,7 @@ textarea {
   border-radius: 4px;
   color: var(--text-color--default);
   background: var(--bg-color--default);
-  border: 1px solid var(--border-color--light);
+  border: 1px solid #d9d9d9;
   box-sizing: border-box;
 }
 textarea {

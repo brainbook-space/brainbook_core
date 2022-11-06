@@ -1,6 +1,6 @@
 /* globals customElements */
-import {LitElement, html, css} from '../../vendor/lit-element/lit-element'
-import { classMap } from '../../vendor/lit-element/lit-html/directives/class-map'
+import {LitElement, html, css} from 'lit'
+import { classMap } from 'lit/directives/class-map'
 import _get from 'lodash.get'
 import * as bg from '../bg-process-rpc'
 import buttonResetCSS from './button-reset.css'
@@ -53,10 +53,6 @@ class NavbarSiteInfo extends LitElement {
     }
   }
 
-  get isHyperdrive () {
-    return this.url.startsWith('hyper://')
-  }
-
   // rendering
   // =
 
@@ -88,21 +84,8 @@ class NavbarSiteInfo extends LitElement {
       <link rel="stylesheet" href="beaker://assets/font-awesome.css">
       <button class=${classMap({[this.siteTrust]: true, pressed: this.isPressed, 'hide-origin': this.hideOrigin, rounded: this.rounded})} @click=${this.onClickButton}>
         ${innerHTML}
-        ${this.renderHyperCtrls()}
       </button>
     `
-  }
-
-  renderHyperCtrls () {
-    if (!this.isHyperdrive) {
-      return ''
-    }
-    if (this.writable) {
-      if (['system', 'profile'].includes(this.driveIdent)) {
-        return ''
-      }
-      return html`<span class="fas fa-fw fa-pen"></span>`
-    }
   }
 
   // events

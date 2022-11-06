@@ -1,4 +1,4 @@
-import {css} from '../vendor/lit-element/lit-element.js'
+import {css} from 'lit'
 
 const cssStr = css`
 body {
@@ -27,6 +27,7 @@ body {
   --bg-color--private-light: #f5faf7;
   --bg-color--private-semi-light: #edf6f1;
   --bg-color--light-highlight: #f7faff;
+  --bg-color--selected: var(--text-color--link);
   --bg-color--unread: #f2f3ff;
 }
 

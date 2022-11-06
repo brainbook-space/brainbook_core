@@ -99,9 +99,6 @@ export function setup () {
       } else {
         data = await sitedata.get(url, asset)
         if (!data && asset === 'thumb') {
-          if (url.startsWith('hyper://private')) {
-            return serveJpg(path.join(__dirname, `./assets/img/default-private-screenshot.jpg`), DEFAULTS[asset], cb)
-          }
           // try fallback to screenshot
           data = await sitedata.get(url, 'screenshot', {dontExtractOrigin: true, normalizeUrl: true})
           if (!data) {

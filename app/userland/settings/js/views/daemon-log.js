@@ -1,4 +1,4 @@
-import { LitElement, html } from '../../../app-stdlib/vendor/lit-element/lit-element.js'
+import { LitElement, html } from 'lit'
 import _debounce from 'lodash.debounce'
 import viewCSS from '../../css/views/fs-audit-log.css.js'
 import { toNiceDomain } from '../../../app-stdlib/js/strings.js'

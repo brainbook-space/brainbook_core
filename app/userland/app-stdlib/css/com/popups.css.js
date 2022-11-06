@@ -1,8 +1,8 @@
-import {css} from '../../vendor/lit-element/lit-element.js'
-import buttonscss from '../buttons2.css.js'
+import {css} from 'lit'
+import buttons2css from '../buttons2.css.js'
 import inputscss from '../inputs.css.js'
 const cssStr = css`
-${buttonscss}
+${buttons2css}
 ${inputscss}
 
 .popup-wrapper {

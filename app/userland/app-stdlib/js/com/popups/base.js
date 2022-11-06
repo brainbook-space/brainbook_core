@@ -1,4 +1,4 @@
-import {LitElement, html} from '../../../vendor/lit-element/lit-element.js'
+import {LitElement, html} from 'lit'
 import popupsCSS from '../../../css/com/popups.css.js'
 
 // exported api

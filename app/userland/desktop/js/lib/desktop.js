@@ -1,13 +1,7 @@
-import { getAvailableName } from 'beaker://app-stdlib/js/fs.js'
+import { getAvailableName } from '../../../app-stdlib/js/fs.js'
 
 // exported
 // =
-
-// const EXPLORER_APP = 'https://hyperdrive.network/'
-// export const FIXED_FILES = [
-//   makeFixedLink('.home-drive.goto', `${EXPLORER_APP}system`, 'Home Drive'),
-//   makeFixedLink('.library.goto', 'beaker://library/', 'My Library'),
-// ]
 
 export async function load () {
   var bookmarks = []

@@ -1,5 +1,5 @@
-import { LitElement, html, css } from '../../../app-stdlib/vendor/lit-element/lit-element.js'
-import { repeat } from '../../../app-stdlib/vendor/lit-element/lit-html/directives/repeat.js'
+import { LitElement, html, css } from 'lit'
+import { repeat } from 'lit/directives/repeat.js'
 import { pluralize, toNiceDomain } from '../../../app-stdlib/js/strings.js'
 import viewCSS from '../../css/views/general.css.js'
 
@@ -46,7 +46,7 @@ class NetworkView extends LitElement {
   async load () {
     this.error = undefined
     try {
-      var networkStatus = await beaker.browser.getDaemonNetworkStatus()
+      var networkStatus = []
       for (let item of networkStatus) {
         item.drive = await beaker.drives.get(item.key)
         item.peers.sort((a, b) => a.remoteAddress.localeCompare(b.remoteAddress)) // helps spot dupes
@@ -76,33 +76,7 @@ class NetworkView extends LitElement {
         ${this.networkStatus.length === 0 ? html`
           <p><em>No active drives</em></p>
         ` : ''}
-        <table>
-          ${repeat(this.networkStatus, (v, i) => i, item => this.renderDriveStatus(item))}
-        </table>
       ` : html`<p><span class="spinner"></span></p>`}
-    `
-  }
-
-  renderDriveStatus (item) {
-    var {key, peers, drive} = item
-    var domain = drive && drive.ident.system ? 'private' : `${key.slice(0, 6)}..${key.slice(-2)}`
-    var title = drive && drive.info && drive.info.title ? `${drive.info.title} (${domain})` : domain
-    var forkOf = drive.forkOf ? ` ["${drive.forkOf.label}" fork of ${toNiceDomain(drive.forkOf.key)}]` : ''
-    return html`
-      <tr>
-        <td>
-          <a href="hyper://${drive && drive.ident.system ? 'private' : key}/" target="_blank">
-            ${title}
-            ${forkOf}
-          </a>
-        </td>
-        <td>
-          <details>
-            <summary>${peers.length} ${pluralize(peers.length, 'peer')}</summary>
-            ${peers.map(p => html`<div>${p.remoteAddress} (${p.type})</div>`)}
-          </details>
-        </td>
-      </tr>
     `
   }
 

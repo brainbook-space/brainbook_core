@@ -5,7 +5,11 @@ var jetpack = require('fs-jetpack');
 var rollup = require('rollup');
 var Q = require('q');
 var browserify = require('browserify');
+const babelify = require('babelify');
 var intoStream = require('into-stream');
+var uglify = require("rollup-plugin-uglify");
+// var resolve = require('@rollup/plugin-node-resolve');
+var commonjs = require('@rollup/plugin-commonjs');
 
 var nodeBuiltInModules = ['assert', 'buffer', 'child_process', 'cluster',
   'console', 'constants', 'crypto', 'dgram', 'dns', 'domain', 'events',
@@ -29,6 +33,8 @@ module.exports = function (src, dest, opts) {
 
   rollup.rollup({
     input: src,
+    //plugins: [ commonjs(), resolve.nodeResolve(), uglify.uglify()],
+    plugins: [ uglify.uglify()],
     external: generateExternalModulesList(),
     onwarn (warning, warn) {
       // skip certain warnings
@@ -50,7 +56,8 @@ module.exports = function (src, dest, opts) {
 
     if (opts && opts.browserify) {
       // Browserify the code
-      var b = browserify(intoStream(result.output[0].code), { basedir: opts.basedir, builtins: opts.browserifyBuiltins });
+      var b = browserify(intoStream(result.output[0].code), { basedir: opts.basedir, builtins: opts.browserifyBuiltins })
+      .transform(babelify, { global: true, presets: ['@babel/preset-env'] });
       b.exclude('electron');
       if (opts.excludeNodeModules) nodeBuiltInModules.forEach(m => b.exclude(m))
       if (opts.browserifyExclude) opts.browserifyExclude.forEach(m => b.exclude(m))

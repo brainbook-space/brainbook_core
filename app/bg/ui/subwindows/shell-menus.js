@@ -35,6 +35,7 @@ export function setup (parentWindow) {
   var view = views[parentWindow.id] = new BrowserView({
     webPreferences: {
       defaultEncoding: 'utf-8',
+      contextIsolation: false,
       preload: path.join(__dirname, 'fg', 'shell-menus', 'index.build.js')
     }
   })

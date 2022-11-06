@@ -1,6 +1,6 @@
 /* globals customElements */
-import {LitElement, html, css} from '../vendor/lit-element/lit-element'
-import {classMap} from '../vendor/lit-element/lit-html/directives/class-map'
+import {LitElement, html, css} from 'lit'
+import {classMap} from 'lit/directives/class-map'
 import _get from 'lodash.get'
 import * as bg from './bg-process-rpc'
 import buttonResetCSS from './navbar/button-reset.css'
@@ -103,8 +103,6 @@ class ShellWindowNavbar extends LitElement {
         num-matches="${_get(this, 'activeTab.currentInpageFindResults.matches', '0')}"
       ></shell-window-navbar-inpage-find>
       <div class="buttons">
-        ${this.watchlistBtn}
-        ${this.daemonInactiveBtn}
         ${this.browserMenuBtn}
       </div>
     `
@@ -228,7 +226,6 @@ class ShellWindowNavbar extends LitElement {
         ${this.isUpdateAvailable
           ? html`<span class="fas fa-arrow-alt-circle-up"></span>`
           : html`<span class="fa fa-bars"></span>`}
-        ${!this.isHolepunchable ? html`<span class="fas fa-circle"></span>` : ''}
       </button>
     `
   }

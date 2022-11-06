@@ -1,5 +1,5 @@
 import { FULL_LIST } from '../data/emoji-list.js'
-import * as skinTone from '../vendor/emoji-skin-tone/index.js'
+import * as skinTone from 'skin-tone'
 
 const EMOJI_VARIANT = `\uFE0F` // this codepoint forces emoji rendering rather than symbolic
 

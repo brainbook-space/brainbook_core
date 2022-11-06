@@ -1,4 +1,4 @@
-import { html, css } from '../../../vendor/lit-element/lit-element.js'
+import { html, css } from 'lit'
 import { BasePopup } from './base.js'
 import popupsCSS from '../../../css/com/popups.css.js'
 

@@ -1,6 +1,11 @@
 {
-  "name": "beakerbrowser",
+  "name": "brainbook-core",
   "devDependencies": {
+    "@babel/core": "^7.13.8",
+    "@babel/preset-env": "^7.9.6",
+    "babel-core": "^6.26.3",
+    "babel-preset-env": "^1.7.0",
+    "babelify": "^10.0.0",
     "browserify": "^17.0.0",
     "electron": "12.2.3",
     "electron-builder": "^23.0.3",
@@ -21,6 +26,9 @@
     "pre-commit": "^1.2.2",
     "q": "^1.4.1",
     "rollup": "^1.23.0",
+    "rollup-plugin-uglify": "^6.0.4",
+    "@rollup/plugin-node-resolve": "11.2.1",
+    "@rollup/plugin-commonjs": "11.0.2",
     "yargs": "^4.2.0"
   },
   "optionalDependencies": {
@@ -31,14 +39,7 @@
     "afterSign": "./afterSignHook.js",
     "appId": "com.bluelinklabs.beaker-browser",
     "asar": false,
-    "asarUnpack": [
-      "./fg/json-renderer/index.build.js",
-      "./fg/syntax-highlighter/index.js",
-      "./node_modules/@beaker/dat-legacy-tools/**",
-      "./node_modules/sodium-native/**",
-      "./node_modules/hyperdrive-daemon/**"
-    ],
-    "copyright": "© 2020, Blue Link Labs",
+    "copyright": "© 2020, Blue Link Labs, Ming-Jye Sheng",
     "directories": {
       "app": "../app",
       "buildResources": "../build",
@@ -51,18 +52,6 @@
         "schemes": [
           "http",
           "https"
-        ]
-      },
-      {
-        "name": "hyper",
-        "schemes": [
-          "hyper"
-        ]
-      },
-      {
-        "name": "dat",
-        "schemes": [
-          "dat"
         ]
       }
     ],

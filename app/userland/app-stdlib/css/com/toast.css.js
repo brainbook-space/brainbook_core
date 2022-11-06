@@ -1,12 +1,6 @@
-import {css} from '../../vendor/lit-element/lit-element.js'
+import {css} from 'lit'
 
 const cssStr = css`
-:host {
-  --toast-min-width: 350px;
-  --toast-padding: 10px 15px;
-  --toast-font-size: 16px;
-}
-
 .toast-wrapper {
   position: fixed;
   top: 20px;
@@ -19,13 +13,13 @@ const cssStr = css`
 }
 .toast {
   position: relative;
-  min-width: var(--toast-min-width);
+  min-width: 350px;
   max-width: 450px;
   background: #ddd;
   margin: 0;
-  padding: var(--toast-padding);
+  padding: 10px 15px;
   border-radius: 4px;
-  font-size: var(--toast-font-size);
+  font-size: 16px;
   color: #fff;
   background: rgba(0, 0, 0, 0.75);
   -webkit-font-smoothing: antialiased;

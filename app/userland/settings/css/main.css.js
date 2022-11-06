@@ -1,12 +1,12 @@
-import {css} from '../../app-stdlib/vendor/lit-element/lit-element.js'
+import {css, unsafeCSS} from 'lit'
 import commonCSS from '../../app-stdlib/css/common.css.js'
 import buttonsCSS from '../../app-stdlib/css/buttons2.css.js'
 import emptyCSS from './empty.css.js'
 
 const cssStr = css`
-${commonCSS}
-${buttonsCSS}
-${emptyCSS}
+${unsafeCSS(commonCSS)}
+${unsafeCSS(buttonsCSS)}
+${unsafeCSS(emptyCSS)}
 
 :host {
   display: block;

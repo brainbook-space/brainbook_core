@@ -1,5 +1,5 @@
 /* globals customElements */
-import { LitElement, html, css } from '../vendor/lit-element/lit-element'
+import { LitElement, html, css } from 'lit'
 import _get from 'lodash.get'
 import * as bg from './bg-process-rpc'
 import commonCSS from './common.css'

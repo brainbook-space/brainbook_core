@@ -1,4 +1,4 @@
-import { LitElement, html } from '../../../app-stdlib/vendor/lit-element/lit-element.js'
+import { LitElement, html } from 'lit'
 import viewCSS from '../../css/views/devices.css.js'
 import * as toast from '../../../app-stdlib/js/com/toast.js'
 

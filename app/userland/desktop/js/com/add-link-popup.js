@@ -1,12 +1,12 @@
 /* globals beaker */
-import { html, css } from 'beaker://app-stdlib/vendor/lit-element/lit-element.js'
-import { repeat } from 'beaker://app-stdlib/vendor/lit-element/lit-html/directives/repeat.js'
-import { BasePopup } from 'beaker://app-stdlib/js/com/popups/base.js'
-import buttonsCSS from 'beaker://app-stdlib/css/buttons2.css.js'
-import popupsCSS from 'beaker://app-stdlib/css/com/popups.css.js'
-import { writeToClipboard } from 'beaker://app-stdlib/js/clipboard.js'
-import * as contextMenu from 'beaker://app-stdlib/js/com/context-menu.js'
-import { toNiceUrl, normalizeUrl } from 'beaker://app-stdlib/js/strings.js'
+import { html, css } from 'lit'
+import { repeat } from 'lit/directives/repeat.js'
+import { BasePopup } from '../../../app-stdlib/js/com/popups/base.js'
+import buttonsCSS from '../../../app-stdlib/css/buttons2.css.js'
+import popupsCSS from '../../../app-stdlib/css/com/popups.css.js'
+import { writeToClipboard } from '../../../app-stdlib/js/clipboard.js'
+import * as contextMenu from '../../../app-stdlib/js/com/context-menu.js'
+import { toNiceUrl, normalizeUrl } from '../../../app-stdlib/js/strings.js'
 
 // exported api
 // =

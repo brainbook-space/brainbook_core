@@ -1,8 +1,8 @@
 /* globals customElements */
 import { ipcRenderer } from 'electron'
-import { LitElement, html, css } from '../vendor/lit-element/lit-element'
-import { classMap } from '../vendor/lit-element/lit-html/directives/class-map'
-import { repeat } from '../vendor/lit-element/lit-html/directives/repeat'
+import { LitElement, html, css } from 'lit'
+import { classMap } from 'lit/directives/class-map'
+import { repeat } from 'lit/directives/repeat'
 import spinnerCSS from './spinner.css'
 import * as bg from './bg-process-rpc'
 
@@ -335,7 +335,7 @@ class ShellWindowTabs extends LitElement {
     e.currentTarget.classList.remove('drag-hover')
     
     const url = e.dataTransfer.getData("text")
-    if (url && (url.startsWith("https://") || url.startsWith("dat://") || url.startsWith("hyper://"))) {
+    if (url && url.startsWith("https://")) {
       e.preventDefault()
       bg.views.createTab(url, {focusLocationBar: true, setActive: true})
       bg.views.reorderTab(this.tabsState.length, index)

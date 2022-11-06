@@ -5,7 +5,7 @@ import { URL } from 'url'
 // constants
 // =
 
-const API_DOCS_URL = 'https://beakerbrowser.com/docs/apis/experimental-capturepage.html'
+const API_DOCS_URL = 'https://brainbook.space/docs/apis/experimental-capturepage.html'
 const API_PERM_ID = 'experimentalCapturePage'
 const LAB_API_ID = 'capturePage'
 
@@ -48,8 +48,8 @@ export default {
     try { urlp = new URL(url) }
     catch (e) { throw new Error('The first argument must be a URL string') }
 
-    if (['http:', 'https:', 'hyper:'].indexOf(urlp.protocol) === -1) {
-      throw new Error('Can only capture pages served over http, https, or hyper')
+    if (['http:', 'https:'].indexOf(urlp.protocol) === -1) {
+      throw new Error('Can only capture pages served over http or https')
     }
 
     // check perms

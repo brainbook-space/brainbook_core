@@ -51,13 +51,14 @@ var bundleApplication = function () {
     bundle(fgDir.path('shell-window/index.js'),        fgDir.path('shell-window/index.build.js'), { browserify: true, basedir: srcDir.cwd(), browserifyBuiltins: true, browserifyExclude: ['fs'] }),
     bundle(fgDir.path('shell-menus/index.js'),         fgDir.path('shell-menus/index.build.js'), { browserify: true, basedir: srcDir.cwd(), browserifyBuiltins: true }),
     bundle(fgDir.path('location-bar/index.js'),        fgDir.path('location-bar/index.build.js'), { browserify: true, basedir: srcDir.cwd(), browserifyBuiltins: true }),
-    // bundle(fgDir.path('prompts/index.js'),             fgDir.path('prompts/index.build.js'), { browserify: true, basedir: srcDir.cwd(), browserifyBuiltins: true }),
+  // bundle(fgDir.path('prompts/index.js'),             fgDir.path('prompts/index.build.js'), { browserify: true, basedir: srcDir.cwd(), browserifyBuiltins: true }),
     // bundle(fgDir.path('perm-prompt/index.js'),         fgDir.path('perm-prompt/index.build.js'), { browserify: true, basedir: srcDir.cwd(), browserifyBuiltins: true }),
     // bundle(fgDir.path('modals/index.js'),              fgDir.path('modals/index.build.js'), { browserify: true, basedir: srcDir.cwd(), browserifyBuiltins: true }),
     bundle(fgDir.path('json-renderer/index.js'),       fgDir.path('json-renderer/index.build.js'), { browserify: true, basedir: srcDir.cwd(), excludeNodeModules: true }),
-    bundle(userlandDir.path('site-info/js/main.js'),   userlandDir.path('site-info/js/main.build.js'), { browserify: true, basedir: srcDir.cwd(), browserifyBuiltins: true }),
-    bundle(userlandDir.path('settings/js/main.js'),    userlandDir.path('settings/js/main.build.js'), { browserify: true, basedir: srcDir.cwd(), browserifyBuiltins: true })
-  ]);
+    bundle(userlandDir.path('library/js/main.js'),   userlandDir.path('library/js/index.build.js'), { browserify: true, basedir: srcDir.cwd(), browserifyBuiltins: true }),
+    bundle(userlandDir.path('desktop/js/main.js'),      userlandDir.path('desktop/js/index.build.js'), { browserify: true, basedir: srcDir.cwd(), browserifyBuiltins: true }),
+    bundle(userlandDir.path('settings/js/main.js'),    userlandDir.path('settings/js/index.build.js'), { browserify: true, basedir: srcDir.cwd(), browserifyBuiltins: true })
+]);
 };
 
 var bundleSpecs = function () {

@@ -1,15 +1,12 @@
 export default {
   createEventsStream: 'readable',
   getInfo: 'promise',
-  getDaemonStatus: 'promise',
-  getDaemonNetworkStatus: 'promise',
   checkForUpdates: 'promise',
   restartBrowser: 'sync',
 
   getSettings: 'promise',
   getSetting: 'promise',
   setSetting: 'promise',
-  updateAdblocker: 'promise',
   updateSetupState: 'promise',
   migrate08to09: 'promise',
   setStartPageBackgroundImage: 'promise',
@@ -23,17 +20,16 @@ export default {
   uploadFavicon: 'promise',
   imageToIco: 'promise',
 
-  reconnectHyperdriveDaemon: 'promise',
-
   fetchBody: 'promise',
   downloadURL: 'promise',
+
+  convertDat: 'promise',
 
   getResourceContentType: 'sync',
   getCertificate: 'promise',
 
   executeShellWindowCommand: 'promise',
   toggleSiteInfo: 'promise',
-  toggleLiveReloading: 'promise',
   setWindowDimensions: 'promise',
   setWindowDragModeEnabled: 'promise',
   moveWindow: 'promise',

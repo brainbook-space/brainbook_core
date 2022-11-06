@@ -1,8 +1,6 @@
 const isNode = typeof window === 'undefined'
 const parse = isNode ? require('url').parse : browserParse
-import { slugify } from './strings'
 
-export const isHyperHashRegex = /^[a-z0-9]{64}/i
 const isIPAddressRegex = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/
 const isPath = /^\//
 const URL_RE = /^[\S]+:\/\/[\S]+$/i
@@ -14,7 +12,6 @@ export function examineLocationInput (v) {
     isPath.test(v) ||
     /\.[A-z]/.test(v) ||
     isIPAddressRegex.test(v) ||
-    isHyperHashRegex.test(v) ||
     v.startsWith('localhost') ||
     v.includes('://') ||
     v.startsWith('beaker:') ||
@@ -25,9 +22,7 @@ export function examineLocationInput (v) {
   var vWithProtocol = v
   var isGuessingTheScheme = false
   if (isProbablyUrl && !isPath.test(v) && !v.includes('://') && !(v.startsWith('beaker:') || v.startsWith('data:') || v.startsWith('intent:') || v.startsWith('about:'))) {
-    if (isHyperHashRegex.test(v)) {
-      vWithProtocol = 'hyper://' + v
-    } else if (v.startsWith('localhost') || isIPAddressRegex.test(v)) {
+    if (v.startsWith('localhost') || isIPAddressRegex.test(v)) {
       vWithProtocol = 'http://' + v
     } else {
       vWithProtocol = 'https://' + v
@@ -42,11 +37,6 @@ const SCHEME_REGEX = /[a-z]+:\/\//i
 //                   1          2      3        4
 const VERSION_REGEX = /^(hyper:\/\/)?([^/]+)(\+[^/]+)(.*)$/i
 export function parseDriveUrl (str, parseQS) {
-  // prepend the scheme if it's missing
-  if (!SCHEME_REGEX.test(str)) {
-    str = 'hyper://' + str
-  }
-
   var parsed, version = null, match = VERSION_REGEX.exec(str)
   if (match) {
     // run typical parse with version segment removed
@@ -61,33 +51,11 @@ export function parseDriveUrl (str, parseQS) {
     parsed.query = Object.fromEntries(parsed.searchParams) // to match node
   }
   parsed.version = version // add version segment
-  if (!parsed.origin) parsed.origin = `hyper://${parsed.hostname}/`
   return parsed
 }
 
 function browserParse (str) {
   return new URL(str)
-}
-
-export function createResourceSlug (href, title) {
-  var slug
-  try {
-    var hrefp = new URL(href)
-    if (hrefp.pathname === '/' && !hrefp.search && !hrefp.hash) {
-      // at the root path - use the hostname for the filename
-      slug = slugify(hrefp.hostname)
-    } else if (typeof title === 'string' && !!title.trim()) {
-      // use the title if available on subpages
-      slug = slugify(title.trim())
-    } else {
-      // use parts of the url
-      slug = slugify(hrefp.hostname + hrefp.pathname + hrefp.search + hrefp.hash)
-    }
-  } catch (e) {
-    // weird URL, just use slugified version of it
-    slug = slugify(href)
-  }
-  return slug.toLowerCase()
 }
 
 /**
@@ -134,16 +102,6 @@ export function normalizeUrl (url, base = undefined) {
  */
 export function isUrlLike (url) {
   return typeof url === 'string' && URL_RE.test(url)
-}
-
-/**
- * @param {String} url 
- * @returns {Boolean}
- */
-export function isHyperUrl (url) {
-  if (url.length === 64 && isHyperHashRegex.test(url)) return true
-  if (url.startsWith('hyper://')) return true
-  return false
 }
 
 /**

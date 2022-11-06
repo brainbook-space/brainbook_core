@@ -14,35 +14,35 @@ import * as downloads from './downloads'
 import * as permissions from './permissions'
 import * as shellMenusSubwindow from './subwindows/shell-menus'
 import * as locationBarSubwindow from './subwindows/location-bar'
-import * as promptsSubwindow from './subwindows/prompts'
-import * as permPromptSubwindow from './subwindows/perm-prompt'
-import * as modalsSubwindow from './subwindows/modals'
-import * as overlaySubwindow from './subwindows/overlay'
-import * as siteInfoSubwindow from './subwindows/site-info'
-import * as tabSwitcherSubwindow from './subwindows/tab-switcher'
+// import * as promptsSubwindow from './subwindows/prompts'
+// import * as permPromptSubwindow from './subwindows/perm-prompt'
+// import * as modalsSubwindow from './subwindows/modals'
+// import * as overlaySubwindow from './subwindows/overlay'
+// import * as siteInfoSubwindow from './subwindows/site-info'
+// import * as tabSwitcherSubwindow from './subwindows/tab-switcher'
 import { findWebContentsParentWindow } from '../lib/electron'
 import * as settingsDb from '../dbs/settings'
 import { getEnvVar } from '../lib/env'
 import _pick from 'lodash.pick'
 import * as logLib from '../logger'
 const logger = logLib.child({category: 'browser'})
-
 const IS_WIN = process.platform === 'win32'
 const IS_LINUX = process.platform === 'linux'
 const subwindows = {
   locationBar: locationBarSubwindow,
-  menu: shellMenusSubwindow,
-  prompts: promptsSubwindow,
-  permPrompt: permPromptSubwindow,
-  modals: modalsSubwindow,
-  overlay: overlaySubwindow,
-  siteInfo: siteInfoSubwindow,
-  tabSwitcher: tabSwitcherSubwindow
+  menu: shellMenusSubwindow
+  // prompts: promptsSubwindow,
+  // permPrompt: permPromptSubwindow,
+  // modals: modalsSubwindow,
+  // overlay: overlaySubwindow,
+  // siteInfo: siteInfoSubwindow,
+  // tabSwitcher: tabSwitcherSubwindow
 }
+const package_name = require(__dirname+'/package.json').name
 
 // globals
 // =
-
+var defaultUrl = 'beaker://desktop'
 var userDataDir
 var numActiveWindows = 0
 var firstWindow = null
@@ -64,7 +64,7 @@ export async function setup () {
   sessionWatcher = new SessionWatcher(userDataDir)
   var previousSessionState = getPreviousBrowsingSession()
   var customStartPage = await settingsDb.get('custom_start_page')
-  var isTestDriverActive = !!getEnvVar('BEAKER_TEST_DRIVER')
+  // var isTestDriverActive = !!getEnvVar('BEAKER_TEST_DRIVER')
   var isOpenUrlEnvVar = !!getEnvVar('BEAKER_OPEN_URL')
 
   // set up app events
@@ -172,9 +172,10 @@ export async function setup () {
     // create new window
     createShellWindow(opts)
   }
+
 }
 
-export function createShellWindow (windowState, createOpts = {dontInitPages: false}) {
+export function createShellWindow (windowState, createOpts = {dontInitPages: false, headless: false}) {
   if (!sessionWatcher) {
     logger.error('Attempted to create a shell window prior to setup', {stack: (new Error()).stack})
     return
@@ -215,6 +216,7 @@ export function createShellWindow (windowState, createOpts = {dontInitPages: fal
     icon: ICON_PATH,
     show: false // will show when ready
   }, frameSettings))
+
   win.once('ready-to-show', () => {
     win.show()
     if (!hasFirstWindowLoaded) {
@@ -349,7 +351,7 @@ export function getActiveWindow () {
   var win = BrowserWindow.getFocusedWindow()
   if (!win || win.webContents.getURL() !== 'beaker://shell-window/') {
     win = BrowserWindow.getAllWindows().filter(win => win.webContents.getURL() === 'beaker://shell-window/').pop()
-  }
+  }   
   return win
 }
 
@@ -427,7 +429,7 @@ function windowWithinBounds (windowState, bounds) {
 function userWantsToRestoreSession () {
   let answer = dialog.showMessageBoxSync({
     type: 'question',
-    message: 'Sorry! It looks like Beaker did not exit properly',
+    message: 'Sorry! It looks like BrainBook did not exit properly',
     detail: 'Would you like to restore your previous browsing session?',
     buttons: [ 'Restore Session', 'Start New Session' ],
     defaultId: 0,
@@ -546,7 +548,8 @@ function onEscape (win) {
 
 function globalTabSwitcherKeyHandler (e, input) {
   var win = getActiveWindow()
-
+  if (!win)
+    return
   if (input.type === 'keyDown' && input.key === 'Tab' && input.control) {
     if (!isTabSwitcherActive[win.id]) {
       isTabSwitcherActive[win.id] = true

@@ -1,19 +1,26 @@
 import { app, BrowserWindow, dialog, Menu } from 'electron'
-import { createShellWindow, toggleShellInterface, getActiveWindow, getFocusedDevToolsHost } from './windows'
+import { createShellWindow, getActiveWindow, ICON_PATH } from './windows'
 import { getEnvVar } from '../lib/env'
 import * as tabManager from './tabs/manager'
 import * as viewZoom from './tabs/zoom'
 import * as shellMenus from './subwindows/shell-menus'
 import { download } from './downloads'
 import * as settingsDb from '../dbs/settings'
-
 // globals
 // =
-
+const package_name = require(__dirname+'/package.json').name
 var currentMenuTemplate
-
 // exported APIs
 // =
+
+/**
+ * Modules to control application life without exposing browser functions for non-developer users
+*/
+/* global __dirname, process */
+const isDev = require('electron-is-dev');
+const windowStateKeeper = require('electron-window-state');
+const path = require('path');
+const URL = require('url');
 
 export function setup () {
   setApplicationMenu({noWindows: true})
@@ -57,12 +64,9 @@ export function buildWindowMenu (opts = {}) {
   const noWindows = !win
   const tab = !noWindows && win ? tabManager.getActive(win) : undefined
   const url = tab?.url || tab?.loadingURL || ''
-  const isDriveSite = url.startsWith('hyper://')
-  const driveInfo = isDriveSite ? tab.driveInfo : undefined
-  const isWritable = driveInfo && driveInfo.writable
 
   var darwinMenu = {
-    label: 'Beaker',
+    label: 'BrainBook',
     submenu: [
       {
         label: 'Preferences',
@@ -75,7 +79,7 @@ export function buildWindowMenu (opts = {}) {
       { type: 'separator' },
       { label: 'Services', role: 'services', submenu: [] },
       { type: 'separator' },
-      { label: 'Hide Beaker', accelerator: 'Cmd+H', role: 'hide' },
+      { label: 'Hide BrainBook', accelerator: 'Cmd+H', role: 'hide' },
       { label: 'Hide Others', accelerator: 'Cmd+Alt+H', role: 'hideothers' },
       { label: 'Show All', role: 'unhide' },
       { type: 'separator' },
@@ -92,119 +96,6 @@ export function buildWindowMenu (opts = {}) {
           } else {
             app.quit()
           }
-        },
-        reserved: true
-      }
-    ]
-  }
-
-  var fileMenu = {
-    label: 'File',
-    submenu: [
-      {
-        id: 'newTab',
-        label: 'New Tab',
-        accelerator: 'CmdOrCtrl+T',
-        click: function (item) {
-          if (win) {
-            tabManager.create(win, undefined, {setActive: true, focusLocationBar: true})
-          } else {
-            createShellWindow()
-          }
-        },
-        reserved: true
-      },
-      {
-        id: 'newWindow',
-        label: 'New Window',
-        accelerator: 'CmdOrCtrl+N',
-        click: function () { createShellWindow() },
-        reserved: true
-      },
-      { type: 'separator' },
-      // TODO
-      // {
-      //   id: 'savePageAs',
-      //   label: 'Save Page As...',
-      //   enabled: !noWindows,
-      //   accelerator: 'CmdOrCtrl+Shift+S',
-      //   click: async (item) => {
-      //     createWindowIfNone(getWin(), async (win) => {
-      //       if (!tab) return
-      //       const {url, title} = tab
-      //       var res = await runSelectFileDialog(win, {
-      //         saveMode: true,
-      //         title: `Save ${title} as...`,
-      //         buttonLabel: 'Save Page',
-      //         defaultFilename: url.split('/').filter(Boolean).pop() || 'index.html',
-      //         drive: url.startsWith('hyper:') ? url : undefined
-      //       })
-      //       let drive = await hyper.drives.getOrLoadDrive(res.origin)
-      //       await drive.pda.writeFile(res.path, await fetch(url))
-      //       tabManager.create(win, res.url, {setActive: true, adjacentActive: true})
-      //     })
-      //   }
-      // },
-      {
-        id: 'exportPageAs',
-        label: 'Export Page As...',
-        enabled: !noWindows,
-        click: async (item) => {
-          if (!tab) return
-          const {url, title} = tab
-          var {filePath} = await dialog.showSaveDialog({ title: `Save ${title} as...`, defaultPath: app.getPath('downloads') })
-          if (filePath) download(win, win.webContents, url, { saveAs: filePath, suppressNewDownloadEvent: true })
-        }
-      },
-      {
-        id: 'print',
-        label: 'Print',
-        enabled: !noWindows,
-        accelerator: 'CmdOrCtrl+P',
-        click: (item) => {
-          if (!tab) return
-          tab.webContents.print()
-        }
-      },
-      { type: 'separator' },
-      {
-        id: 'reopenClosedTab',
-        label: 'Reopen Closed Tab',
-        accelerator: 'CmdOrCtrl+Shift+T',
-        click: function (item) {
-          createWindowIfNone(win, (win) => {
-            tabManager.reopenLastRemoved(win)
-          })
-        },
-        reserved: true
-      },
-      {
-        id: 'closeTab',
-        label: 'Close Tab',
-        enabled: !noWindows,
-        accelerator: 'CmdOrCtrl+W',
-        click: function (item) {
-          if (win) {
-            // a regular browser window
-            let active = tabManager.getActive(win)
-            if (active) active.removePane(active.activePane)
-          } else {
-            // devtools
-            let wc = getFocusedDevToolsHost()
-            if (wc) {
-              wc.closeDevTools()
-            }
-          }
-        },
-        reserved: true
-      },
-      {
-        id: 'closeWindow',
-        label: 'Close Window',
-        enabled: !noWindows,
-        accelerator: 'CmdOrCtrl+Shift+W',
-        click: function (item) {
-          if (win) win.close()
         },
         reserved: true
       }
@@ -482,106 +373,179 @@ export function buildWindowMenu (opts = {}) {
       }
     }
   })
+
   var windowMenu = {
     label: 'Window',
     role: 'window',
     submenu: [
+      // {
+      //   id: 'newTab',
+      //   label: 'New Tab',
+      //   accelerator: 'CmdOrCtrl+T',
+      //   click: function (item) {
+      //     if (win) {
+      //       tabManager.create(win, undefined, {setActive: true, focusLocationBar: true})
+      //     } else {
+      //       createShellWindow()
+      //     }
+      //   },
+      //   reserved: true
+      // },
       {
-        id: 'toggleAlwaysOnTop',
-        type: 'checkbox',
-        label: 'Always on Top',
-        checked: (win ? win.isAlwaysOnTop() : false),
-        click: function () {
-          if (win) win.setAlwaysOnTop(!win.isAlwaysOnTop())
-        }
-      },
-      {
-        label: 'Minimize',
-        accelerator: 'CmdOrCtrl+M',
-        role: 'minimize'
-      },
-      {type: 'separator'},
-      {
-        id: 'toggleFullScreen',
-        label: 'Full Screen',
-        enabled: !noWindows,
-        accelerator: (process.platform === 'darwin') ? 'Ctrl+Cmd+F' : 'F11',
-        role: 'toggleFullScreen',
-        click: function () {
-          if (win) {
-            win.setFullScreen(!win.isFullScreen())
-          }
-        }
-      },
-      {
-        id: 'toggleBrowserUi',
-        label: 'Toggle Browser UI',
-        enabled: !noWindows,
-        accelerator: 'CmdOrCtrl+Shift+H',
-        click: function (item) {
-          if (win) toggleShellInterface(win)
-        }
-      },
-      {
-        id: 'focusLocationBar',
-        label: 'Focus Location Bar',
-        accelerator: 'CmdOrCtrl+L',
-        click: function (item) {
-          createWindowIfNone(win, (win) => {
-            win.webContents.send('command', 'focus-location')
-          })
-        }
-      },
-      {type: 'separator'},
-      {
-        id: 'nextTab',
-        label: 'Next Tab',
-        enabled: !noWindows,
-        accelerator: (process.platform === 'darwin') ? 'Alt+CmdOrCtrl+Right' : 'CmdOrCtrl+PageDown',
-        click: function (item) {
-          if (win) tabManager.changeActiveBy(win, 1)
-        }
-      },
-      {
-        id: 'previousTab',
-        label: 'Previous Tab',
-        enabled: !noWindows,
-        accelerator: (process.platform === 'darwin') ? 'Alt+CmdOrCtrl+Left' : 'CmdOrCtrl+PageUp',
-        click: function (item) {
-          if (win) tabManager.changeActiveBy(win, -1)
-        }
-      },
-      {
-        label: 'Tab Shortcuts',
-        type: 'submenu',
-        submenu: [
-          gotoTabShortcut(1),
-          gotoTabShortcut(2),
-          gotoTabShortcut(3),
-          gotoTabShortcut(4),
-          gotoTabShortcut(5),
-          gotoTabShortcut(6),
-          gotoTabShortcut(7),
-          gotoTabShortcut(8),
-          {
-            label: `Last Tab`,
-            enabled: !noWindows,
-            accelerator: `CmdOrCtrl+9`,
-            click: function (item) {
-              if (win) tabManager.setActive(win, tabManager.getAll(win).slice(-1)[0])
-            }
-          }
-        ]
-      },
-      {
-        id: 'popOutTab',
-        label: 'Pop Out Tab',
-        enabled: !noWindows,
-        accelerator: 'Shift+CmdOrCtrl+P',
-        click: function (item) {
-          if (tab) tabManager.popOutTab(tab)
-        }
+        id: 'newWindow',
+        label: 'New Window',
+        accelerator: 'CmdOrCtrl+N',
+        click: function () { createShellWindow() },
+        reserved: true
       }
+      // {
+      //   id: 'reopenClosedTab',
+      //   label: 'Reopen Closed Tab',
+      //   accelerator: 'CmdOrCtrl+Shift+T',
+      //   click: function (item) {
+      //     createWindowIfNone(win, (win) => {
+      //       tabManager.reopenLastRemoved(win)
+      //     })
+      //   },
+      //   reserved: true
+      // }
+      // {
+      //   id: 'reopenClosedTab',
+      //   label: 'Reopen Closed Tab',
+      //   accelerator: 'CmdOrCtrl+Shift+T',
+      //   click: function (item) {
+      //     createWindowIfNone(win, (win) => {
+      //       tabManager.reopenLastRemoved(win)
+      //     })
+      //   },
+      //   reserved: true
+      // },
+      // {
+      //   id: 'closeTab',
+      //   label: 'Close Tab',
+      //   enabled: !noWindows,
+      //   accelerator: 'CmdOrCtrl+W',
+      //   click: function (item) {
+      //     if (win) {
+      //       // a regular browser window
+      //       let active = tabManager.getActive(win)
+      //       if (active) active.removePane(active.activePane)
+      //     } else {
+      //       // devtools
+      //       let wc = getFocusedDevToolsHost()
+      //       if (wc) {
+      //         wc.closeDevTools()
+      //       }
+      //     }
+      //   },
+      //   reserved: true
+      // },
+      // {
+      //   id: 'closeWindow',
+      //   label: 'Close Window',
+      //   enabled: !noWindows,
+      //   accelerator: 'CmdOrCtrl+Shift+W',
+      //   click: function (item) {
+      //     if (win) win.close()
+      //   },
+      //   reserved: true
+      // },
+      // {type: 'separator'},
+      // {
+      //   id: 'nextTab',
+      //   label: 'Next Tab',
+      //   enabled: !noWindows,
+      //   accelerator: (process.platform === 'darwin') ? 'Alt+CmdOrCtrl+Right' : 'CmdOrCtrl+PageDown',
+      //   click: function (item) {
+      //     if (win) tabManager.changeActiveBy(win, 1)
+      //   }
+      // },
+      // {
+      //   id: 'previousTab',
+      //   label: 'Previous Tab',
+      //   enabled: !noWindows,
+      //   accelerator: (process.platform === 'darwin') ? 'Alt+CmdOrCtrl+Left' : 'CmdOrCtrl+PageUp',
+      //   click: function (item) {
+      //     if (win) tabManager.changeActiveBy(win, -1)
+      //   }
+      // },
+      // {
+      //   label: 'Tab Shortcuts',
+      //   type: 'submenu',
+      //   submenu: [
+      //     gotoTabShortcut(1),
+      //     gotoTabShortcut(2),
+      //     gotoTabShortcut(3),
+      //     gotoTabShortcut(4),
+      //     gotoTabShortcut(5),
+      //     gotoTabShortcut(6),
+      //     gotoTabShortcut(7),
+      //     gotoTabShortcut(8),
+      //     {
+      //       label: `Last Tab`,
+      //       enabled: !noWindows,
+      //       accelerator: `CmdOrCtrl+9`,
+      //       click: function (item) {
+      //         if (win) tabManager.setActive(win, tabManager.getAll(win).slice(-1)[0])
+      //       }
+      //     }
+      //   ]
+      // },
+      // {
+      //   id: 'popOutTab',
+      //   label: 'Pop Out Tab',
+      //   enabled: !noWindows,
+      //   accelerator: 'Shift+CmdOrCtrl+P',
+      //   click: function (item) {
+      //     if (tab) tabManager.popOutTab(tab)
+      //   }
+      // },
+      // { type: 'separator' },
+      // {
+      //   id: 'toggleAlwaysOnTop',
+      //   type: 'checkbox',
+      //   label: 'Always on Top',
+      //   checked: (win ? win.isAlwaysOnTop() : false),
+      //   click: function () {
+      //     if (win) win.setAlwaysOnTop(!win.isAlwaysOnTop())
+      //   }
+      // },
+      // {
+      //   label: 'Minimize',
+      //   accelerator: 'CmdOrCtrl+M',
+      //   role: 'minimize'
+      // },
+      // {
+      //   id: 'toggleFullScreen',
+      //   label: 'Full Screen',
+      //   enabled: !noWindows,
+      //   accelerator: (process.platform === 'darwin') ? 'Ctrl+Cmd+F' : 'F11',
+      //   role: 'toggleFullScreen',
+      //   click: function () {
+      //     if (win) {
+      //       win.setFullScreen(!win.isFullScreen())
+      //     }
+      //   }
+      // },
+      // {
+      //   id: 'toggleBrowserUi',
+      //   label: 'Toggle Browser UI',
+      //   enabled: !noWindows,
+      //   accelerator: 'CmdOrCtrl+Shift+H',
+      //   click: function (item) {
+      //     if (win) toggleShellInterface(win)
+      //   }
+      // },
+      // {
+      //   id: 'focusLocationBar',
+      //   label: 'Focus Location Bar',
+      //   accelerator: 'CmdOrCtrl+L',
+      //   click: function (item) {
+      //     createWindowIfNone(win, (win) => {
+      //       win.webContents.send('command', 'focus-location')
+      //     })
+      //   }
+      // }
     ]
   }
   if (process.platform == 'darwin') {
@@ -600,26 +564,15 @@ export function buildWindowMenu (opts = {}) {
     submenu: [
       {
         id: 'beakerHelp',
-        label: 'Beaker Help',
+        label: 'BrainBook Help',
         accelerator: 'F1',
         click: function (item) {
-          if (win) tabManager.create(win, 'https://docs.beakerbrowser.com/', {setActive: true})
-        }
-      },
-      {type: 'separator'},
-      {
-        id: 'reportIssue',
-        label: 'Report Issue',
-        click: function (item) {
-          if (win) tabManager.create(win, 'https://github.com/beakerbrowser/beaker/issues', {setActive: true})
-        }
-      },
-      {
-        id: 'beakerDiscussions',
-        label: 'Discussion Forum',
-        click: function (item) {
-          if (win) tabManager.create(win, 'https://github.com/beakerbrowser/beaker/discussions', {setActive: true})
-        }
+          if (win) {
+            tabManager.create(win, "https://brainbook.space/docs/", {setActive: true, focusLocationBar: true})
+          } else {
+            createShellWindow({ pages: ["https://brainbook.space/docs/"] })
+          }
+        },
       }
     ]
   }
@@ -635,8 +588,10 @@ export function buildWindowMenu (opts = {}) {
   }
 
   // assemble final menu
-  var menus = [fileMenu, editMenu, viewMenu, historyMenu, windowMenu, helpMenu]
-  if (process.platform === 'darwin') menus.unshift(darwinMenu)
+  var menus
+    menus = [editMenu, viewMenu, historyMenu, windowMenu, helpMenu]
+    if (process.platform === 'darwin') menus.unshift(darwinMenu)
+
   return menus
 }
 

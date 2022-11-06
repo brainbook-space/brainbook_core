@@ -1,9 +1,8 @@
-import { LitElement, html } from '../../app-stdlib/vendor/lit-element/lit-element.js'
-import { classMap } from '../../app-stdlib/vendor/lit-element/lit-html/directives/class-map.js'
+import { LitElement, html } from 'lit'
+import { classMap } from 'lit/directives/class-map.js'
 import * as QP from './lib/query-params.js'
 import css from '../css/main.css.js'
 import './views/general.js'
-import './views/blocking.js'
 import './views/info.js'
 import './views/network.js'
 import './views/fs-audit-log.js'
@@ -62,10 +61,9 @@ class SettingsApp extends LitElement {
     }
     return html`
       ${item('general', 'fas fa-cog', 'General')}
-      ${item('blocking', 'fas fa-ban', 'Content Blocking')}
       <hr>
       ${item('general-logs', 'fas fa-clipboard-list', 'General Logs')}
-      ${item('network', 'fas fa-share-alt', 'Network Stats')}
+      ${''/*item('network', 'fas fa-share-alt', 'Network Stats')*/}
       ${item('fs-audit-log', 'fas fa-clipboard-check', 'Filesystem Audit Log')}
       ${''/*DISABLEDitem('daemon-log', 'fas fa-clipboard-list', 'Daemon Log')*/}
       ${item('info', 'fas fa-info-circle', 'Information')}
@@ -77,8 +75,6 @@ class SettingsApp extends LitElement {
     switch (this.currentSubview) {
       case 'general':
         return html`<general-settings-view loadable></general-settings-view>`
-      case 'blocking':
-        return html`<blocking-settings-view loadable></blocking-settings-view>`
       case 'info':
         return html`<info-settings-view loadable></info-settings-view>`
       case 'network':

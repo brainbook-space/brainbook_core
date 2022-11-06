@@ -72,8 +72,6 @@ export function onWebRequestCompleted (details) {
     }
     if (details.url.startsWith('beaker://')) {
       wcInfo.trust = TRUST.TRUSTED
-    } else if (details.url.startsWith('hyper://') && details.responseHeaders['Beaker-Trusted-Interface']) {
-      wcInfo.trust = TRUST.TRUSTED
     } else {
       wcInfo.trust = TRUST.UNTRUSTED
     }

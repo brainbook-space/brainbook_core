@@ -1,9 +1,9 @@
-import { LitElement, html } from 'beaker://app-stdlib/vendor/lit-element/lit-element.js'
-import { repeat } from 'beaker://app-stdlib/vendor/lit-element/lit-html/directives/repeat.js'
-import { writeToClipboard } from 'beaker://app-stdlib/js/clipboard.js'
-import { emit } from 'beaker://app-stdlib/js/dom.js'
-import * as toast from 'beaker://app-stdlib/js/com/toast.js'
-import { EditBookmarkPopup } from 'beaker://app-stdlib/js/com/popups/edit-bookmark.js'
+import { LitElement, html } from 'lit'
+import { repeat } from 'lit/directives/repeat.js'
+import { writeToClipboard } from '../../../app-stdlib/js/clipboard.js'
+import { emit } from '../../../app-stdlib/js/dom.js'
+import * as toast from '../../../app-stdlib/js/com/toast.js'
+import { EditBookmarkPopup } from '../../../app-stdlib/js/com/popups/edit-bookmark.js'
 import bookmarksCSS from '../../css/views/bookmarks.css.js'
 
 export class BookmarksView extends LitElement {
@@ -38,8 +38,8 @@ export class BookmarksView extends LitElement {
 
   async bookmarkMenu (bookmark) {
     var items = [
-      {label: 'Open Link in New Tab', click: () => window.open(bookmark.href)},
-      {label: 'Copy Link Address', click: () => writeToClipboard(bookmark.href)},
+      {label: 'Open Link in New Tab', click: () => window.open(bookmark.url)},
+      {label: 'Copy Link Address', click: () => writeToClipboard(bookmark.url)},
       {type: 'separator'},
       {label: 'Edit', click: () => this.onClickEdit(bookmark)},
       {type: 'checkbox', checked: bookmark.pinned, label: 'Pin to start page', click: () => this.onToggleBookmarkPinned(null, bookmark)},
@@ -127,9 +127,19 @@ export class BookmarksView extends LitElement {
       e.stopPropagation()
     }
     if (bookmark.pinned) {
-      await beaker.bookmarks.add(Object.assign({}, bookmark, {pinned: false}))
+      let b = {
+        href: bookmark.url,
+        title: bookmark.title,
+        pinned: false
+      }
+      await beaker.bookmarks.add(b)
     } else {
-      await beaker.bookmarks.add(Object.assign({}, bookmark, {pinned: true}))
+      let b = {
+        href: bookmark.url,
+        title: bookmark.title,
+        pinned: true
+      }
+      await beaker.bookmarks.add(b)
     }
     this.load()
     emit(this, 'update-pins')
@@ -147,7 +157,7 @@ export class BookmarksView extends LitElement {
 
   async onClickRemove (bookmark) {
     if (!confirm('Are you sure?')) return
-    await beaker.bookmarks.remove(bookmark.href)
+    await beaker.bookmarks.remove(bookmark.url)
     toast.create('Bookmark removed', '', 10e3)
     this.load()
   }

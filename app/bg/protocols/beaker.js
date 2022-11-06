@@ -14,25 +14,25 @@ import ICO from 'icojs'
 // content security policies
 const BEAKER_CSP = `
   default-src 'self' beaker:;
-  img-src beaker: asset: data: blob: hyper: http: https;
-  script-src 'self' beaker: 'unsafe-eval';
-  media-src 'self' beaker: hyper:;
+  img-src beaker: asset: data: blob: http: https;
+  script-src 'self' beaker: 'unsafe-inline';
+  media-src 'self' beaker: ;
   style-src 'self' 'unsafe-inline' beaker:;
   child-src 'self';
 `.replace(/\n/g, '')
 const BEAKER_APP_CSP = `
   default-src 'self' beaker:;
-  img-src beaker: asset: data: blob: hyper: http: https;
-  script-src 'self' beaker: hyper: 'unsafe-eval';
-  media-src 'self' beaker: hyper:;
+  img-src beaker: asset: data: blob: http: https;
+  script-src 'self' beaker: 'unsafe-inline';
+  media-src 'self' beaker: ;
   style-src 'self' 'unsafe-inline' beaker:;
-  child-src 'self' hyper:;
+  child-src 'self' ;
 `.replace(/\n/g, '')
 const SIDEBAR_CSP = `
 default-src 'self' beaker:;
-img-src beaker: asset: data: blob: hyper: http: https;
-script-src 'self' beaker: hyper: blob: 'unsafe-eval';
-media-src 'self' beaker: hyper:;
+img-src beaker: asset: data: blob: http: https;
+script-src 'self' beaker: blob: 'unsafe-inline';
+media-src 'self' beaker: ;
 style-src 'self' 'unsafe-inline' beaker:;
 child-src 'self' beaker:;
 `.replace(/\n/g, '')
@@ -216,20 +216,8 @@ async function beakerProtocol (request, respond) {
   if (requestUrl === 'beaker://app-stdlib' || requestUrl.startsWith('beaker://app-stdlib/')) {
     return serveAppAsset(requestUrl, path.join(__dirname, 'userland', 'app-stdlib'), cb)
   }
-  if (requestUrl === 'beaker://diff' || requestUrl.startsWith('beaker://diff/')) {
-    return serveAppAsset(requestUrl, path.join(__dirname, 'userland', 'diff'), cb)
-  }
   if (requestUrl === 'beaker://library' || requestUrl.startsWith('beaker://library/')) {
     return serveAppAsset(requestUrl, path.join(__dirname, 'userland', 'library'), cb, {fallbackToIndexHTML: true})
-  }
-  if (requestUrl === 'beaker://drive-view' || requestUrl.startsWith('beaker://drive-view/')) {
-    return serveAppAsset(requestUrl, path.join(__dirname, 'userland', 'drive-view'), cb)
-  }
-  if (requestUrl === 'beaker://cmd-pkg' || requestUrl.startsWith('beaker://cmd-pkg/')) {
-    return serveAppAsset(requestUrl, path.join(__dirname, 'userland', 'cmd-pkg'), cb)
-  }
-  if (requestUrl === 'beaker://site-info' || requestUrl.startsWith('beaker://site-info/')) {
-    return serveAppAsset(requestUrl, path.join(__dirname, 'userland', 'site-info'), cb, {fallbackToIndexHTML: true})
   }
   if (requestUrl === 'beaker://setup' || requestUrl.startsWith('beaker://setup/')) {
     return serveAppAsset(requestUrl, path.join(__dirname, 'userland', 'setup'), cb, {fallbackToIndexHTML: true})
@@ -237,26 +225,11 @@ async function beakerProtocol (request, respond) {
   if (requestUrl === 'beaker://init' || requestUrl.startsWith('beaker://init/')) {
     return serveAppAsset(requestUrl, path.join(__dirname, 'userland', 'init'), cb, {fallbackToIndexHTML: true})
   }
-  if (requestUrl === 'beaker://editor' || requestUrl.startsWith('beaker://editor/')) {
-    return serveAppAsset(requestUrl, path.join(__dirname, 'userland', 'editor'), cb)
-  }
-  if (requestUrl === 'beaker://explorer' || requestUrl.startsWith('beaker://explorer/')) {
-    return serveAppAsset(requestUrl, path.join(__dirname, 'userland', 'explorer'), cb, {fallbackToIndexHTML: true})
-  }
-  if (requestUrl === 'beaker://webterm' || requestUrl.startsWith('beaker://webterm/')) {
-    return serveAppAsset(requestUrl, path.join(__dirname, 'userland', 'webterm'), cb, {
-      fallbackToIndexHTML: true,
-      CSP: SIDEBAR_CSP
-    })
-  }
   if (requestUrl === 'beaker://desktop' || requestUrl.startsWith('beaker://desktop/')) {
     return serveAppAsset(requestUrl, path.join(__dirname, 'userland', 'desktop'), cb, {
       CSP: BEAKER_APP_CSP,
       fallbackToIndexHTML: true,
     })
-  }
-  if (requestUrl === 'beaker://history' || requestUrl.startsWith('beaker://history/')) {
-    return serveAppAsset(requestUrl, path.join(__dirname, 'userland', 'history'), cb)
   }
   if (requestUrl === 'beaker://settings' || requestUrl.startsWith('beaker://settings/')) {
     return serveAppAsset(requestUrl, path.join(__dirname, 'userland', 'settings'), cb)
@@ -282,6 +255,15 @@ async function beakerProtocol (request, respond) {
   }
 
   // debugging
+  // if (requestUrl === 'beaker://active-drives/') {
+  //   return cb(200, 'OK', 'text/html; charset=utf-8', drivesDebugPage)
+  // }
+  // if (requestUrl === 'beaker://dat-dns-cache/') {
+  //   return cb(200, 'OK', 'text/html; charset=utf-8', datDnsCachePage)
+  // }
+  // if (requestUrl === 'beaker://dat-dns-cache/main.js') {
+  //   return cb(200, 'OK', 'application/javascript; charset=utf-8', datDnsCacheJS)
+  // }
   // TODO replace?
   // if (requestUrl.startsWith('beaker://debug-log/')) {
   //   const PAGE_SIZE = 1e6

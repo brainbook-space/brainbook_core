@@ -1,4 +1,5 @@
-import {css} from '../vendor/lit-element/lit-element.js'
+import {css} from 'lit'
+
 const cssStr = css`
 /**
  * New button styles
@@ -28,7 +29,7 @@ button {
   --box-shadow-color--transparent-button: rgba(0,0,0,.25);
 
   background: var(--bg-color--button);
-  border: 1px solid var(--border-color--button);
+  border: 1px solid var(--border-color--semi-light);
   border-radius: 3px;
   box-shadow: 0 1px 1px var(--box-shadow-color--button);
   padding: 5px 10px;
@@ -41,7 +42,7 @@ button {
   button {
     --bg-color--button: #333;
     --bg-color--button--hover: #444;
-    --bg-color--button--active: #555;
+    --bg-color--button--active: #eee;
     --bg-color--button--pressed: #6d6d6d;
     --bg-color--button--disabled: #444;
     --bg-color--primary-button: #5289f7;
