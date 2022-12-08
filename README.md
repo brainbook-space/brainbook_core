@@ -48,13 +48,13 @@ npm install -g node-gyp
 npm install -g gulp
 ```
 
-To build:
+To build, use node 16:
 
 ```bash
 git clone https://github.com/mingjyesheng-ioteye/brainbook_core
 cd brainbook_core/scripts
 npm install
-npm run rebuild 
+npm run build 
 npm start
 ```
 

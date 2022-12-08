@@ -7,7 +7,7 @@
     "babel-preset-env": "^1.7.0",
     "babelify": "^10.0.0",
     "browserify": "^17.0.0",
-    "electron": "12.2.3",
+    "electron": "20.2.0",
     "electron-builder": "^23.0.3",
     "electron-notarize": "^0.3.0",
     "eslint": "^4.5.0",
